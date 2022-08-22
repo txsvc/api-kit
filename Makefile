@@ -5,11 +5,13 @@ all: test
 test:
 	go test
 	cd settings && go test
+	cd cli && go test
 
 
 .PHONY: test_build
 test_build:
 	cd examples/simple_api && go build main.go && rm main
+	cd examples/simple_cli && go build cli.go && rm cli
 	
 
 .PHONY: test_coverage
