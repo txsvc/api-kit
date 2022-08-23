@@ -8,7 +8,6 @@
 #
 .gcloudignore
 .git
-.gitignore
 #!include:.gitignore
 Makefile
 Dockerfile

@@ -14,13 +14,13 @@ import (
 
 	"github.com/txsvc/apikit"
 	"github.com/txsvc/apikit/config"
-	"github.com/txsvc/apikit/examples"
+	"github.com/txsvc/apikit/example"
 	"github.com/txsvc/apikit/internal"
 )
 
 func init() {
 	// initialize the config provider
-	config.InitConfigProvider(examples.NewExampleConfigProvider())
+	config.InitConfigProvider(example.NewExampleConfigProvider())
 
 	// create a default configuration for the service (if none exists)
 	path := filepath.Join(config.ResolveConfigLocation(), config.DefaultConfigFileName)

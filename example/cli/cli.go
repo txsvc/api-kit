@@ -10,11 +10,11 @@ import (
 
 	kit "github.com/txsvc/apikit/cli"
 	"github.com/txsvc/apikit/config"
-	"github.com/txsvc/apikit/examples"
+	"github.com/txsvc/apikit/example"
 )
 
 func init() {
-	config.InitConfigProvider(examples.NewExampleConfigProvider())
+	config.InitConfigProvider(example.NewExampleConfigProvider())
 }
 
 func main() {
