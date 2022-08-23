@@ -1,5 +1,7 @@
 # Secrets etc
 **/.cert
+app.yaml
+.config/
 
 # Binaries for programs and plugins
 *.exe
@@ -11,6 +13,7 @@
 # Build, test, internal stuff
 coverage.txt
 /hack/
+bin/
 
 # Test binary, built with `go test -c`
 *.test

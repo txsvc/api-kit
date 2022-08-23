@@ -1,11 +1,14 @@
 package apikit
 
 import (
+	"context"
 	"os"
 	"time"
 
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
+	"github.com/ziflex/lecho/v3"
 )
 
 const (
@@ -21,13 +24,13 @@ type (
 	// SetupFunc creates a new, fully configured mux
 	SetupFunc func() *echo.Echo
 	// ShutdownFunc is called before the server stops
-	ShutdownFunc func(*App)
+	ShutdownFunc func(context.Context, *App) error
 
 	// app holds all configs for the listener
 	App struct {
-		mux              *echo.Echo
-		shutdown         ShutdownFunc
-		errorHandlerImpl echo.HTTPErrorHandler
+		mux      *echo.Echo
+		shutdown ShutdownFunc
+
 		// other settings
 		logLevel      log.Lvl
 		shutdownDelay time.Duration
@@ -35,26 +38,49 @@ type (
 	}
 )
 
-func New(setupFunc SetupFunc, shutdownFunc ShutdownFunc, errorHandler echo.HTTPErrorHandler) (*App, error) {
+// New creates a new service listener instance and configures it with sensible defaults.
+//
+// The following ENV variables are supported:
+// - PORT: default 8080
+// - CONFIG_LOCATION: default ./.config
+// - LOG_LEVEL: default INFO
+//
+// - force_ssl: default false
+// - secret_key_base:
+// - public_file_server: default false
+func New(setupFunc SetupFunc, shutdownFunc ShutdownFunc) (*App, error) {
 	if setupFunc == nil || shutdownFunc == nil {
 		return nil, ErrInvalidConfiguration
 	}
 
 	app := &App{
-		mux:              setupFunc(),
-		shutdown:         shutdownFunc,
-		errorHandlerImpl: errorHandler,
-		logLevel:         log.INFO,
-		shutdownDelay:    ShutdownDelay * time.Second,
+		mux:           setupFunc(),
+		shutdown:      shutdownFunc,
+		logLevel:      log.INFO,
+		shutdownDelay: ShutdownDelay * time.Second,
 	}
 
 	if app.mux == nil {
 		return nil, ErrInvalidConfiguration
 	}
 
-	// add the default endpoints
+	// no greetings
+	app.mux.HideBanner = true
 
-	// the root dir for the service's config
+	// add a logger and middleware
+	logger := lecho.New(os.Stdout)
+	app.mux.Logger.SetLevel(app.logLevel)
+	app.mux.Logger = logger
+
+	app.mux.Use(middleware.RequestID())
+	app.mux.Use(lecho.Middleware(lecho.Config{
+		Logger: logger,
+	}))
+
+	// add a default error handler
+	// app.mux.HTTPErrorHandler = ...
+
+	// the root dir for the config
 	dir, err := os.Getwd()
 	if err != nil {
 		log.Fatal(err)
@@ -62,4 +88,20 @@ func New(setupFunc SetupFunc, shutdownFunc ShutdownFunc, errorHandler echo.HTTPE
 	app.root = dir
 
 	return app, nil
+}
+
+func (a *App) Stop() {
+
+	ctx, cancel := context.WithTimeout(context.Background(), a.shutdownDelay)
+	defer cancel()
+
+	// shutdown of the framework
+	if err := a.mux.Shutdown(ctx); err != nil {
+		a.mux.Logger.Fatal(err)
+	}
+
+	// call the implementation specific shoutdown code to clean-up
+	if err := a.shutdown(ctx, a); err != nil {
+		a.mux.Logger.Fatal(err)
+	}
 }
