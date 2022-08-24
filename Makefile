@@ -18,8 +18,9 @@ test:
 .PHONY: test_build
 test_build:
 	go mod verify && go mod tidy
-	cd example/api && go build main.go && rm main
-	cd example/cli && go build cli.go && rm cli
+	cd examples/auth/api && go build main.go && rm main
+	cd examples/auth/cli && go build cli.go && rm cli
+	cd examples/appengine && go build main.go && rm main
 	
 .PHONY: test_coverage
 test_coverage:
@@ -27,11 +28,11 @@ test_coverage:
 
 
 .PHONY: examples
-examples: example_cli example_api
+examples: example_cli example_appengine
 
-.PHONY: example_api
-example_api:
-	cd example/api && gcloud app deploy . --quiet
+.PHONY: example_appengine
+example_appengine:
+	cd examples/appengine && gcloud app deploy . --quiet
 
 #.PHONY example_api_container
 #example_api_container:
@@ -40,6 +41,6 @@ example_api:
 
 .PHONY: example_cli
 example_cli:
-	cd example/cli && go build -o ${EXAMPLE_CLI_NAME} cli.go && mv ${EXAMPLE_CLI_NAME} ../../bin/${EXAMPLE_CLI_NAME}
+	cd examples/cli && go build -o ${EXAMPLE_CLI_NAME} cli.go && mv ${EXAMPLE_CLI_NAME} ../../bin/${EXAMPLE_CLI_NAME}
 	chmod +x bin/${EXAMPLE_CLI_NAME}
 

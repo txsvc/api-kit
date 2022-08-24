@@ -14,13 +14,12 @@ import (
 
 	"github.com/txsvc/apikit"
 	"github.com/txsvc/apikit/config"
-	"github.com/txsvc/apikit/example"
 	"github.com/txsvc/apikit/internal"
 )
 
 func init() {
 	// initialize the config provider
-	config.InitConfigProvider(example.NewExampleConfigProvider())
+	config.InitConfigProvider(config.NewLocalConfigProvider())
 
 	// create a default configuration for the service (if none exists)
 	path := filepath.Join(config.ResolveConfigLocation(), config.DefaultConfigFileName)
@@ -106,15 +105,3 @@ func pingEndpoint(c echo.Context) error {
 
 	return apikit.StandardResponse(c, http.StatusOK, resp)
 }
-
-/*
-
-ctx := context.Background()
-
-	// basic auth validation
-	_, err := auth.CheckAuthorization(ctx, c, config.ScopeContentAdmin)
-	if err != nil {
-		return api.ErrorResponse(c, http.StatusUnauthorized, err)
-	}
-
-*/

@@ -17,7 +17,7 @@ const (
 	PORT_DEFAULT_TLS = "433"
 
 	// ShutdownDelay is the time to wait for all request, go-routines etc complete
-	ShutdownDelay = 10 // seconds
+	ShutdownDelay = 30 // seconds
 )
 
 type (
@@ -91,17 +91,19 @@ func New(setupFunc SetupFunc, shutdownFunc ShutdownFunc) (*App, error) {
 }
 
 func (a *App) Stop() {
-
+	// FIXME: this does not work !
 	ctx, cancel := context.WithTimeout(context.Background(), a.shutdownDelay)
 	defer cancel()
 
-	// shutdown of the framework
-	if err := a.mux.Shutdown(ctx); err != nil {
-		a.mux.Logger.Fatal(err)
-	}
+	// FIXME: which one comes first ? framwork or app shutdown ?
 
 	// call the implementation specific shoutdown code to clean-up
 	if err := a.shutdown(ctx, a); err != nil {
+		a.mux.Logger.Fatal(err)
+	}
+
+	// shutdown of the framework
+	if err := a.mux.Shutdown(ctx); err != nil {
 		a.mux.Logger.Fatal(err)
 	}
 }

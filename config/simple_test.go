@@ -13,7 +13,7 @@ func TestVersionStrings(t *testing.T) {
 }
 
 func TestGenericConfig(t *testing.T) {
-	conf := genericProvider().(*GenericConfiguration)
+	conf := NewSimpleConfigProvider().(*simpleConfig)
 	assert.NotNil(t, conf)
 
 	assert.Equal(t, conf.Name(), Name())
@@ -32,7 +32,7 @@ func TestGenericConfig(t *testing.T) {
 }
 
 func TestSetConfigLocation(t *testing.T) {
-	conf := genericProvider().(*GenericConfiguration)
+	conf := NewSimpleConfigProvider().(*simpleConfig)
 	assert.NotNil(t, conf)
 
 	InitConfigProvider(conf)
@@ -48,7 +48,7 @@ func TestSetConfigLocation(t *testing.T) {
 }
 
 func TestGetDefaultSettings(t *testing.T) {
-	conf := genericProvider().(*GenericConfiguration)
+	conf := NewSimpleConfigProvider().(*simpleConfig)
 	assert.NotNil(t, conf)
 
 	InitConfigProvider(conf)
@@ -59,7 +59,7 @@ func TestGetDefaultSettings(t *testing.T) {
 }
 
 func TestGetSettings(t *testing.T) {
-	conf := genericProvider().(*GenericConfiguration)
+	conf := NewSimpleConfigProvider().(*simpleConfig)
 	assert.NotNil(t, conf)
 
 	InitConfigProvider(conf)

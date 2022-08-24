@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -51,11 +52,24 @@ var (
 )
 
 func init() {
-	InitConfigProvider(genericProvider())
+	// makes sure that SOMETHING is initialized
+	InitConfigProvider(NewSimpleConfigProvider())
 }
 
 func InitConfigProvider(provider interface{}) {
 	confProvider = provider
+}
+
+func VersionString() string {
+	return fmt.Sprintf("%d.%d.%d", MajorVersion(), MinorVersion(), FixVersion())
+}
+
+func UserAgentString() string {
+	return fmt.Sprintf("%s %d.%d.%d", ShortName(), MajorVersion(), MinorVersion(), FixVersion())
+}
+
+func ServerString() string {
+	return fmt.Sprintf("%s %d.%d.%d", ShortName(), MajorVersion(), MinorVersion(), FixVersion())
 }
 
 func Name() string {

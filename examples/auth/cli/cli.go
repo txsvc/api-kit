@@ -10,11 +10,10 @@ import (
 
 	kit "github.com/txsvc/apikit/cli"
 	"github.com/txsvc/apikit/config"
-	"github.com/txsvc/apikit/example"
 )
 
 func init() {
-	config.InitConfigProvider(example.NewExampleConfigProvider())
+	config.InitConfigProvider(config.NewLocalConfigProvider())
 }
 
 func main() {
@@ -76,7 +75,7 @@ func setupFlags() []cli.Flag {
 
 //
 // Commands implementations. Usually this would be in its own package
-// but as it is an example, I will keep it in just one file for clarity.
+// but as this is an example, I will keep it in just one file for clarity.
 //
 
 func PingCmd(c *cli.Context) error {
