@@ -8,6 +8,7 @@ all: test
 
 .PHONY: test
 test:
+	cd api && go test
 	cd cli && go test
 	cd config && go test
 	cd internal && go test

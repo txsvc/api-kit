@@ -1,7 +1,6 @@
-package apikit
+package api
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 
@@ -66,11 +65,5 @@ func (so *StatusObject) Error() string {
 
 // DefaultEndpoint returns http.StatusOK if the service is able to respond to requests.
 func DefaultEndpoint(c echo.Context) error {
-	LogHttpRequest(context.TODO(), c.Request())
 	return StandardResponse(c, http.StatusOK, nil)
-}
-
-// FIXME move this somewhere else !
-func LogHttpRequest(ctx context.Context, req *http.Request) {
-	// FIXME observer.LogWithLevel(observer.LevelInfo, req.RequestURI, "user-agent", req.UserAgent())
 }

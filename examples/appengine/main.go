@@ -12,6 +12,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 
 	"github.com/txsvc/apikit"
+	"github.com/txsvc/apikit/api"
 	"github.com/txsvc/apikit/config"
 	"github.com/txsvc/apikit/internal"
 )
@@ -89,13 +90,13 @@ func pingEndpoint(c echo.Context) error {
 	// this endpoint needs at minimum an "api:read" scope
 	_, err := internal.CheckAuthorization(ctx, c, internal.ScopeApiRead)
 	if err != nil {
-		return apikit.ErrorResponse(c, http.StatusUnauthorized, err)
+		return api.ErrorResponse(c, http.StatusUnauthorized, err)
 	}
 
-	resp := apikit.StatusObject{
+	resp := api.StatusObject{
 		Status:  http.StatusOK,
 		Message: fmt.Sprintf("version: %s", config.VersionString()),
 	}
 
-	return apikit.StandardResponse(c, http.StatusOK, resp)
+	return api.StandardResponse(c, http.StatusOK, resp)
 }
