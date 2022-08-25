@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -58,17 +59,48 @@ func NewClient(logger logger.Logger) (*Client, error) {
 	}, nil
 }
 
+// GET is used to request data from the API. No payload, only queries!
 func (c *Client) GET(uri string, response interface{}) (int, error) {
-
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s%s", c.cfg.Endpoint, uri), nil)
-	if err != nil {
-		return http.StatusBadRequest, err
-	}
-
-	return c.invoke(req, response)
+	return c.request("GET", fmt.Sprintf("%s%s", c.cfg.Endpoint, uri), nil, response)
 }
 
-func (c *Client) invoke(req *http.Request, response interface{}) (int, error) {
+func (c *Client) POST(uri string, request, response interface{}) (int, error) {
+	return c.request("POST", fmt.Sprintf("%s%s", c.cfg.Endpoint, uri), request, response)
+}
+
+func (c *Client) PUT(uri string, request, response interface{}) (int, error) {
+	return c.request("PUT", fmt.Sprintf("%s%s", c.cfg.Endpoint, uri), request, response)
+}
+
+func (c *Client) DELETE(uri string, request, response interface{}) (int, error) {
+	return c.request("DELETE", fmt.Sprintf("%s%s", c.cfg.Endpoint, uri), request, response)
+}
+
+func (c *Client) request(method, url string, request, response interface{}) (int, error) {
+	var req *http.Request
+
+	if request != nil {
+		p, err := json.Marshal(&request)
+		if err != nil {
+			return http.StatusInternalServerError, err
+		}
+
+		req, err = http.NewRequest(method, url, bytes.NewBuffer(p))
+		if err != nil {
+			return http.StatusBadRequest, err
+		}
+	} else {
+		var err error
+		req, err = http.NewRequest(method, url, nil)
+		if err != nil {
+			return http.StatusBadRequest, err
+		}
+	}
+
+	return c.roundTrip(req, response)
+}
+
+func (c *Client) roundTrip(req *http.Request, response interface{}) (int, error) {
 
 	req.Header.Set("Content-Type", "application/json; charset=utf-8")
 	req.Header.Set("User-Agent", c.userAgent)
