@@ -6,11 +6,20 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+
+	"github.com/labstack/echo/v4"
 )
 
-// ReceiveFileUpload handles receiving of file uploads
-func ReceiveFileUpload(ctx context.Context, req *http.Request, location, formName string) (string, error) {
+// DefaultEndpoint just returns http.StatusOK
+func DefaultEndpoint(c echo.Context) error {
+	return StandardResponse(c, http.StatusOK, nil)
+}
+
+// HandleFileUpload receives files from stores them locally
+func HandleFileUpload(ctx context.Context, req *http.Request, location, formName string) (string, error) {
 	var path string
+
+	// FIXME: treat location as a 'bucket' in preparation of switching to a generic storage API
 
 	mr, err := req.MultipartReader()
 	if err != nil {

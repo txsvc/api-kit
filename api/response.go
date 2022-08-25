@@ -62,8 +62,3 @@ func (so *StatusObject) String() string {
 func (so *StatusObject) Error() string {
 	return so.String()
 }
-
-// DefaultEndpoint returns http.StatusOK if the service is able to respond to requests.
-func DefaultEndpoint(c echo.Context) error {
-	return StandardResponse(c, http.StatusOK, nil)
-}
