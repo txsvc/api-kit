@@ -77,7 +77,10 @@ func setup() *echo.Echo {
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
 
-	// add your endpoints here
+	// add common endpoints
+	e = api.WithAuthEndpoints(e)
+
+	// add your own endpoints here
 	e.GET("/ping", pingEndpoint)
 
 	// done

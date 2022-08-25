@@ -1,15 +1,16 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"sort"
 
 	"github.com/urfave/cli/v2"
 
+	"github.com/txsvc/apikit/api"
 	kit "github.com/txsvc/apikit/cli"
 	"github.com/txsvc/apikit/config"
+	"github.com/txsvc/apikit/logger"
 )
 
 func init() {
@@ -80,10 +81,20 @@ func setupFlags() []cli.Flag {
 
 func PingCmd(c *cli.Context) error {
 
-	ds := config.GetSettings()
+	logger := logger.NewStdout("")
 
-	fmt.Println(config.ResolveConfigLocation())
-	fmt.Println(ds)
+	cl, err := api.NewClient(logger)
+	if err != nil {
+		return err
+	}
+
+	var so api.StatusObject
+	if status, err := cl.GET("/ping", &so); err != nil {
+		logger.Errorf("status: %d: %s", status, err)
+		return nil
+	}
+
+	logger.Infof("%v\n", so)
 
 	return nil
 }

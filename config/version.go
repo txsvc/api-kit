@@ -7,6 +7,4 @@ const (
 	minorVersion = 1
 	// FixVersion of the API
 	fixVersion = 0
-	// Version specifies the verion of the API and its structs
-	apiVersion = "v1"
 )

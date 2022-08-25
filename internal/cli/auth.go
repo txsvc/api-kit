@@ -9,6 +9,7 @@ import (
 
 	"github.com/txsvc/apikit"
 	"github.com/txsvc/apikit/config"
+	"github.com/txsvc/apikit/helpers"
 	"github.com/txsvc/apikit/internal"
 )
 
@@ -34,7 +35,7 @@ func InitCommand(c *cli.Context) error {
 		return apikit.ErrAlreadyInitialized // FIXME: can we do better ?
 	}
 
-	mnemonic, err := internal.CreateMnemonic(phrase)
+	mnemonic, err := helpers.CreateMnemonic(phrase)
 	if err != nil {
 		return err
 	}
@@ -61,4 +62,12 @@ func InitCommand(c *cli.Context) error {
 	}
 
 	return nil
+}
+
+func LoginCommand(c *cli.Context) error {
+	return NoOpCommand(c)
+}
+
+func LogoutCommand(c *cli.Context) error {
+	return NoOpCommand(c)
 }

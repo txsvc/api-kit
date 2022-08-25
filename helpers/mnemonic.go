@@ -1,17 +1,19 @@
-package internal
+package helpers
 
 import (
+	"errors"
 	"strings"
 
 	"github.com/Bytom/bytom/wallet/mnemonic"
 	hdwallet "github.com/miguelmota/go-ethereum-hdwallet"
-
-	"github.com/txsvc/apikit"
 )
 
 const (
 	MinWordsInPassPhrase = 11
 )
+
+// ErrInvalidPassPhrase indicates that the pass phrase is too short
+var ErrInvalidPassPhrase = errors.New("invalid pass phrase")
 
 func CreateMnemonic(phrase string) (string, error) {
 	mnemonicPhrase := ""
@@ -37,7 +39,7 @@ func CreateMnemonic(phrase string) (string, error) {
 	}
 
 	if strings.Count(mnemonicPhrase, " ") < MinWordsInPassPhrase {
-		return "", apikit.ErrInvalidPassPhrase
+		return "", ErrInvalidPassPhrase
 	}
 
 	return mnemonicPhrase, nil

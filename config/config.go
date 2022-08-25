@@ -31,7 +31,6 @@ type (
 		MajorVersion() int
 		MinorVersion() int
 		FixVersion() int
-		ApiVersion() string
 
 		DefaultConfigLocation() string // default: ./.config
 
@@ -117,13 +116,6 @@ func FixVersion() int {
 		log.Fatal(ErrMissingConfigurator)
 	}
 	return confProvider.(Configurator).FixVersion()
-}
-
-func ApiVersion() string {
-	if confProvider == nil {
-		log.Fatal(ErrMissingConfigurator)
-	}
-	return confProvider.(Configurator).ApiVersion()
 }
 
 // DefaultConfigLocation returns a default location e.g. %HOME/.config

@@ -68,10 +68,6 @@ func (c *localConfig) FixVersion() int {
 	return fixVersion
 }
 
-func (c *localConfig) ApiVersion() string {
-	return apiVersion
-}
-
 func (c *localConfig) DefaultConfigLocation() string {
 	return DefaultConfigDirLocation
 }

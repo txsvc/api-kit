@@ -8,12 +8,14 @@ all: test
 
 .PHONY: test
 test:
-	cd api && go test -covermode=atomic
-	cd cli && go test -covermode=atomic
-	cd config && go test -covermode=atomic
 	cd internal && go test -covermode=atomic
 	cd internal/cli && go test -covermode=atomic
 	cd internal/settings && go test -covermode=atomic
+	cd logger && go test -covermode=atomic
+	cd helpers && go test -covermode=atomic
+	cd api && go test -covermode=atomic
+	cd cli && go test -covermode=atomic
+	cd config && go test -covermode=atomic
 	go test -covermode=atomic
 
 .PHONY: test_build

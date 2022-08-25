@@ -24,7 +24,6 @@ func TestGenericConfig(t *testing.T) {
 	assert.Equal(t, conf.MajorVersion(), MajorVersion())
 	assert.Equal(t, conf.MinorVersion(), MinorVersion())
 	assert.Equal(t, conf.FixVersion(), FixVersion())
-	assert.Equal(t, conf.ApiVersion(), ApiVersion())
 
 	assert.Equal(t, conf.DefaultConfigLocation(), DefaultConfigLocation())
 	assert.Equal(t, conf.GetConfigLocation(), GetConfigLocation())

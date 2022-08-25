@@ -50,10 +50,6 @@ func (c *simpleConfig) FixVersion() int {
 	return fixVersion
 }
 
-func (c *simpleConfig) ApiVersion() string {
-	return apiVersion
-}
-
 func (c *simpleConfig) DefaultConfigLocation() string {
 	return DefaultConfigDirLocation
 }

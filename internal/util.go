@@ -8,6 +8,7 @@ import (
 
 	"github.com/txsvc/stdlib/v2"
 
+	"github.com/txsvc/apikit/helpers"
 	"github.com/txsvc/apikit/internal/settings"
 )
 
@@ -47,7 +48,7 @@ func InitSettings(realm, userid string) (*settings.Settings, error) {
 	}
 
 	// create a mnemic to derieve the 'password' from
-	mnemonic, err := CreateMnemonic("")
+	mnemonic, err := helpers.CreateMnemonic("")
 	if err != nil {
 		return nil, err // abort here
 	}

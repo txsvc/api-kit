@@ -2,20 +2,13 @@ package apikit
 
 import "errors"
 
-const (
-	MsgStatus = "status: %d"
-)
-
 var (
 	// ErrInvalidConfiguration indicates that parameters used to configure the service were invalid
 	ErrInvalidConfiguration = errors.New("invalid configuration")
-	// ErrInvalidPassPhrase indicates that the pass phrase is too short
-	ErrInvalidPassPhrase = errors.New("invalid pass phrase")
 	// ErrAlreadyInitialized indicates that client is already registered
 	ErrAlreadyInitialized = errors.New("already initialized")
 	// ErrInitializingConfiguration indicates that the client could not be initialized
 	ErrInitializingConfiguration = errors.New("error initializing")
-
 	// ErrNotImplemented indicates that a function is not yet implemented
 	ErrNotImplemented = errors.New("not implemented")
 	// ErrInternalError indicates everything else
