@@ -81,7 +81,7 @@ func setupFlags() []cli.Flag {
 
 func PingCmd(c *cli.Context) error {
 
-	logger := logger.NewStdout("")
+	logger := logger.New()
 
 	cl, err := api.NewClient(logger)
 	if err != nil {

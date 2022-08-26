@@ -16,8 +16,6 @@ import (
 
 type Level int
 
-// FIXME: find better/nicer colors for the different log-levels
-
 const (
 	Debug Level = iota
 	Info
@@ -30,24 +28,18 @@ type Logger struct {
 	level Level
 }
 
-func New(out io.Writer, lvl string) Logger {
+func New() Logger {
+	return NewLogger(os.Stdout, "")
+}
+
+func NewLogger(out io.Writer, lvl string) Logger {
 	return Logger{
 		out:   out,
 		level: levelFromEnv(lvl),
 	}
 }
 
-func NewStdout(lvl string) Logger {
-	return New(os.Stdout, lvl)
-}
-
-func NewFromEnv(out io.Writer) Logger {
-	return Logger{
-		out:   out,
-		level: levelFromEnv(""),
-	}
-}
-
+// levelFromEnv looks for ENV['LOG_LEVEL'], returns level Info by default
 func levelFromEnv(lvl string) Level {
 
 	lit := strings.ToLower(stdlib.GetString("LOG_LEVEL", lvl))
