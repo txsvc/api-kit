@@ -47,7 +47,7 @@ func NewClient(logger logger.Logger) (*Client, error) {
 	}
 	cfg := config.GetSettings()
 	if cfg.Credentials == nil {
-		return nil, ErrMissingCredentials
+		cfg.Credentials = &settings.Credentials{} // just provide something to prevent NPEs further down
 	}
 
 	return &Client{
