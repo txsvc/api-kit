@@ -46,6 +46,10 @@ type (
 var (
 	// ErrMissingConfigurator indicates that the config package is not initialized
 	ErrMissingConfigurator = errors.New("missing configurator")
+	// ErrInitializingConfiguration indicates that the client could not be initialized
+	ErrInitializingConfiguration = errors.New("error initializing configuration")
+	// ErrInvalidConfiguration indicates that parameters used to configure the service were invalid
+	ErrInvalidConfiguration = errors.New("invalid configuration")
 
 	confProvider interface{}
 )
@@ -105,6 +109,7 @@ func MajorVersion() int {
 	}
 	return confProvider.(Configurator).MajorVersion()
 }
+
 func MinorVersion() int {
 	if confProvider == nil {
 		log.Fatal(ErrMissingConfigurator)

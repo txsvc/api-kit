@@ -17,10 +17,10 @@ func TestNewStatus(t *testing.T) {
 
 func TestNewErrorStatus(t *testing.T) {
 	err := fmt.Errorf("error")
-	stat := NewErrorStatus(500, err)
+	stat := NewErrorStatus(500, err, "-")
 
 	assert.NotNil(t, stat)
 	assert.Equal(t, 500, stat.Status)
-	assert.Equal(t, "error", stat.Message)
+	assert.Equal(t, "error (-)", stat.Message)
 	assert.NotEmpty(t, stat.Error())
 }

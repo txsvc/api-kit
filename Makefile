@@ -9,7 +9,7 @@ all: test
 .PHONY: test
 test:
 	cd internal && go test -covermode=atomic
-	cd internal/cli && go test -covermode=atomic
+	cd internal/auth && go test -covermode=atomic
 	cd internal/settings && go test -covermode=atomic
 	cd logger && go test -covermode=atomic
 	cd helpers && go test -covermode=atomic

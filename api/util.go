@@ -1,26 +1,12 @@
 package api
 
 import (
+	"math"
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 )
-
-type (
-	// RelevantHeaders represents the most important headers
-	RelevantHeaders struct {
-		Range           string `header:"Range"`
-		UserAgent       string `header:"User-Agent"`
-		Forwarded       string `header:"Forwarded"`
-		XForwardedFor   string `header:"X-Forwarded-For"`
-		XForwwardedHost string `header:"X-Forwarded-Host"`
-		Referer         string `header:"Referer"`
-	}
-)
-
-func (h *RelevantHeaders) Ranges() (int64, int64) {
-	return ParseRange(h.Range)
-}
 
 // ExtractHeaders extracts the relevant HTTP header stuff only
 func ExtractHeaders(r *http.Request) RelevantHeaders {
@@ -61,4 +47,22 @@ func ParseRange(r string) (int64, int64) {
 	}
 
 	return start, end - start
+}
+
+func Duration(d time.Duration, dicimal int) time.Duration {
+	shift := int(math.Pow10(dicimal))
+
+	units := []time.Duration{time.Second, time.Millisecond, time.Microsecond, time.Nanosecond}
+	for _, u := range units {
+		if d > u {
+			div := u / time.Duration(shift)
+			if div == 0 {
+				break
+			}
+			d = d / div * div
+			break
+		}
+	}
+
+	return d
 }

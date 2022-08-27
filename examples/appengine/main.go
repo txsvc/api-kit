@@ -15,6 +15,7 @@ import (
 	"github.com/txsvc/apikit/api"
 	"github.com/txsvc/apikit/config"
 	"github.com/txsvc/apikit/internal"
+	"github.com/txsvc/apikit/internal/auth"
 )
 
 // FIXME: implement in memory certstore
@@ -40,7 +41,7 @@ func init() {
 		// copy the credentials and api keys
 		def.Credentials = cfg.Credentials
 		def.APIKey = cfg.APIKey
-		def.Scopes = append(def.Scopes, internal.ScopeApiAdmin)
+		def.Scopes = append(def.Scopes, auth.ScopeApiAdmin)
 
 		// save the new configuration
 		def.WriteToFile(path)
@@ -48,7 +49,7 @@ func init() {
 
 	// initialize the credentials store
 	root := filepath.Join(config.ResolveConfigLocation(), "cred")
-	internal.FlushAuthorizations(root)
+	auth.FlushAuthorizations(root)
 }
 
 func main() {
@@ -88,9 +89,9 @@ func pingEndpoint(c echo.Context) error {
 	ctx := context.Background()
 
 	// this endpoint needs at minimum an "api:read" scope
-	_, err := internal.CheckAuthorization(ctx, c, internal.ScopeApiRead)
+	_, err := auth.CheckAuthorization(ctx, c, auth.ScopeApiRead)
 	if err != nil {
-		return api.ErrorResponse(c, http.StatusUnauthorized, err)
+		return api.ErrorResponse(c, http.StatusUnauthorized, err, "")
 	}
 
 	resp := api.StatusObject{

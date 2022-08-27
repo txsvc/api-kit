@@ -17,7 +17,7 @@ import (
 
 func TestNewClient(t *testing.T) {
 
-	cl, err := NewClient(logger.NewLogger(os.Stdout, "debug"))
+	cl, err := NewClient(nil, logger.NewLogger(os.Stdout, "debug"))
 
 	assert.NoError(t, err)
 	assert.NotNil(t, cl)
@@ -25,7 +25,7 @@ func TestNewClient(t *testing.T) {
 
 func TestClientGET(t *testing.T) {
 
-	cl, err := NewClient(logger.NewLogger(os.Stdout, "debug"))
+	cl, err := NewClient(nil, logger.NewLogger(os.Stdout, "debug"))
 	assert.NoError(t, err)
 	assert.NotNil(t, cl)
 

@@ -83,7 +83,7 @@ func PingCmd(c *cli.Context) error {
 
 	logger := logger.New()
 
-	cl, err := api.NewClient(logger)
+	cl, err := api.NewClient(nil, logger)
 	if err != nil {
 		return err
 	}

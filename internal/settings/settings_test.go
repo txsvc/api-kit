@@ -31,3 +31,48 @@ func TestOptions(t *testing.T) {
 	opt = cfg1.GetOption("FOO")
 	assert.Equal(t, "x", opt)
 }
+
+func TestCloneCredentials(t *testing.T) {
+	cred := Credentials{
+		ProjectID: "p",
+		UserID:    "u",
+		Token:     "t",
+		Expires:   10,
+	}
+	dup := cred.Clone()
+	assert.Equal(t, &cred, dup)
+}
+
+func TestCloneSettings(t *testing.T) {
+	s1 := Settings{
+		Endpoint:  "ep",
+		UserAgent: "UserAgent",
+		APIKey:    "APIKey",
+	}
+	dup1 := s1.Clone()
+	assert.Equal(t, s1, dup1)
+
+	// adding Scopes
+	s1.Scopes = []string{"A", "B"}
+	s1.DefaultScopes = []string{"a", "b"}
+
+	dup2 := s1.Clone()
+	assert.Equal(t, s1, dup2)
+
+	// adding credentials
+	s1.Credentials = &Credentials{
+		ProjectID: "p",
+		UserID:    "u",
+		Token:     "t",
+		Expires:   10,
+	}
+
+	dup3 := s1.Clone()
+	assert.Equal(t, s1, dup3)
+
+	// adding options
+	s1.SetOption("foo", "bar")
+
+	dup4 := s1.Clone()
+	assert.Equal(t, s1, dup4)
+}

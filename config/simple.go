@@ -3,7 +3,7 @@ package config
 import (
 	"github.com/txsvc/stdlib/v2"
 
-	"github.com/txsvc/apikit/internal"
+	"github.com/txsvc/apikit/internal/auth"
 	"github.com/txsvc/apikit/internal/settings"
 )
 
@@ -72,9 +72,10 @@ func (c *simpleConfig) GetDefaultSettings() *settings.Settings {
 	return &settings.Settings{
 		Endpoint: "http://localhost:8080",
 		DefaultScopes: []string{
-			internal.ScopeApiRead,
-			internal.ScopeApiWrite,
+			auth.ScopeApiRead,
+			auth.ScopeApiWrite,
 		},
+		Credentials: &settings.Credentials{}, // add this to avoid NPEs further down
 	}
 }
 

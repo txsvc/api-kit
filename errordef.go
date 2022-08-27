@@ -3,20 +3,9 @@ package apikit
 import "errors"
 
 var (
-	// ErrInvalidConfiguration indicates that parameters used to configure the service were invalid
-	ErrInvalidConfiguration = errors.New("invalid configuration")
-	// ErrAlreadyInitialized indicates that client is already registered
-	ErrAlreadyInitialized = errors.New("already initialized")
-	// ErrInitializingConfiguration indicates that the client could not be initialized
-	ErrInitializingConfiguration = errors.New("error initializing")
-	// ErrNotImplemented indicates that a function is not yet implemented
-	ErrNotImplemented = errors.New("not implemented")
-	// ErrInternalError indicates everything else
-	ErrInternalError = errors.New("internal error")
 	// ErrApiError indicates an error in an API call
 	ErrApiError = errors.New("api error")
-	// ErrInvalidRoute indicates that the route and/or its parameters are not valid
-	ErrInvalidRoute = errors.New("invalid route")
+
 	// ErrInvalidResourceName indicates that the resource name is invalid
 	ErrInvalidResourceName = errors.New("invalid resource name")
 	// ErrMissingResourceName indicates that a resource type is missing

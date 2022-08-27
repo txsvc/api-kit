@@ -40,19 +40,28 @@ type (
 	}
 )
 
-func NewClient(logger logger.Logger) (*Client, error) {
-	httpClient, err := NewHTTPClient(logger, http.DefaultTransport)
+func NewClient(cfg *settings.Settings, logger logger.Logger) (*Client, error) {
+	var _cfg *settings.Settings
+
+	httpClient, err := NewTransport(logger, http.DefaultTransport)
 	if err != nil {
 		return nil, err
 	}
-	cfg := config.GetSettings()
-	if cfg.Credentials == nil {
-		cfg.Credentials = &settings.Credentials{} // just provide something to prevent NPEs further down
+
+	// create or clone the settings
+	if cfg != nil {
+		c := cfg.Clone()
+		_cfg = &c
+	} else {
+		_cfg = config.GetSettings()
+		if _cfg.Credentials == nil {
+			_cfg.Credentials = &settings.Credentials{} // just provide something to prevent NPEs further down
+		}
 	}
 
 	return &Client{
 		httpClient: httpClient,
-		cfg:        cfg,
+		cfg:        _cfg,
 		logger:     logger,
 		userAgent:  config.UserAgentString(),
 		trace:      stdlib.GetString("APIKIT_FORCE_TRACE", ""),

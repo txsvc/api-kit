@@ -8,6 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
+	"github.com/txsvc/apikit/config"
 	"github.com/ziflex/lecho/v3"
 )
 
@@ -50,7 +51,7 @@ type (
 // - public_file_server: default false
 func New(setupFunc SetupFunc, shutdownFunc ShutdownFunc) (*App, error) {
 	if setupFunc == nil || shutdownFunc == nil {
-		return nil, ErrInvalidConfiguration
+		return nil, config.ErrInvalidConfiguration
 	}
 
 	app := &App{
@@ -61,7 +62,7 @@ func New(setupFunc SetupFunc, shutdownFunc ShutdownFunc) (*App, error) {
 	}
 
 	if app.mux == nil {
-		return nil, ErrInvalidConfiguration
+		return nil, config.ErrInvalidConfiguration
 	}
 
 	// no greetings

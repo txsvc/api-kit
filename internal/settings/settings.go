@@ -9,6 +9,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/txsvc/stdlib/v2"
 )
@@ -28,6 +29,8 @@ type (
 		DefaultScopes []string `json:"default_scopes,omitempty"`
 
 		Credentials *Credentials `json:"credentials,omitempty"`
+		Status      int          `json:"status,omitempty"`
+
 		//InternalCredentials *Credentials `json:"internal_credentials,omitempty"`
 		//CredentialsFile     string       `json:"credentials_file,omitempty"`
 		//NoAuth              bool         `json:"no_auth,omitempty"`
@@ -45,6 +48,35 @@ type (
 		Expires   int64  `json:"expires,omitempty"`    // 0 = never, < 0 = invalid, > 0 = unix timestamp
 	}
 )
+
+func (ds *Settings) Clone() Settings {
+	s := Settings{
+		Endpoint:  ds.Endpoint,
+		UserAgent: ds.UserAgent,
+		APIKey:    ds.APIKey,
+		Status:    ds.Status,
+	}
+
+	if len(ds.Scopes) > 0 {
+		s.Scopes = make([]string, len(ds.Scopes))
+		copy(s.Scopes, ds.Scopes)
+	}
+	if len(ds.DefaultScopes) > 0 {
+		s.DefaultScopes = make([]string, len(ds.DefaultScopes))
+		copy(s.DefaultScopes, ds.DefaultScopes)
+	}
+
+	if ds.Credentials != nil {
+		s.Credentials = ds.Credentials.Clone()
+	}
+	if len(ds.Options) > 0 {
+		s.Options = make(map[string]string)
+		for k, v := range ds.Options {
+			s.Options[k] = v
+		}
+	}
+	return s
+}
 
 // GetScopes returns the user-provided scopes, if set, or else falls back to the default scopes.
 func (ds *Settings) GetScopes() []string {
@@ -89,21 +121,29 @@ func (ds *Settings) WriteToFile(path string) error {
 	return os.WriteFile(path, cfg, filePerm)
 }
 
+func (c *Credentials) Clone() *Credentials {
+	return &Credentials{
+		ProjectID: c.ProjectID,
+		UserID:    c.UserID,
+		Token:     c.Token,
+		Expires:   c.Expires,
+	}
+}
+
+func (c *Credentials) Key() string {
+	return strings.ToLower(c.ProjectID + "." + c.UserID) // FIXME: make it a md5 ?
+}
+
 // IsValid test if Crendentials is valid
 func (c *Credentials) IsValid() bool {
-	// explicitly set to invalid
-	if c.Expires < 0 {
-		return false
-	}
 	// attributes must be set
 	if len(c.Token) == 0 || len(c.ProjectID) == 0 || len(c.UserID) == 0 {
 		return false
 	}
-	// never expires
+
 	if c.Expires == 0 {
 		return true
 	}
-	// check if Expires is still in the future
 	return c.Expires > stdlib.Now()
 }
 

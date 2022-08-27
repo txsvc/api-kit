@@ -68,6 +68,7 @@ func TestRunStop(t *testing.T) {
 	// do NOT call svc.Stop() as it somehow does an os.Exit(1) thingie ...
 }
 
+// FIXME: the timeout thing doesn't work
 func _TestRunStopTimeout(t *testing.T) {
 	svc, err := New(simpleSetup, timeoutShutdown)
 

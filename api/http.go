@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"io"
-	"math"
 	"net/http"
 	"time"
 
@@ -13,7 +12,20 @@ import (
 	"github.com/txsvc/apikit/logger"
 )
 
-func NewHTTPClient(logger logger.Logger, transport http.RoundTripper) (*http.Client, error) {
+type (
+	LoggingTransport struct {
+		InnerTransport http.RoundTripper
+		Logger         logger.Logger
+	}
+
+	contextKey struct {
+		name string
+	}
+)
+
+var contextKeyRequestStart = &contextKey{"RequestStart"}
+
+func NewTransport(logger logger.Logger, transport http.RoundTripper) (*http.Client, error) {
 	retryTransport := rehttp.NewTransport(
 		transport,
 		rehttp.RetryAll(
@@ -37,17 +49,6 @@ func NewHTTPClient(logger logger.Logger, transport http.RoundTripper) (*http.Cli
 
 	return httpClient, nil
 }
-
-type LoggingTransport struct {
-	InnerTransport http.RoundTripper
-	Logger         logger.Logger
-}
-
-type contextKey struct {
-	name string
-}
-
-var contextKeyRequestStart = &contextKey{"RequestStart"}
 
 func (t *LoggingTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	ctx := context.WithValue(req.Context(), contextKeyRequestStart, time.Now())
@@ -109,22 +110,4 @@ func (t *LoggingTransport) logResponse(resp *http.Response) {
 	}
 
 	resp.Body = io.NopCloser(bytes.NewReader(data))
-}
-
-func Duration(d time.Duration, dicimal int) time.Duration {
-	shift := int(math.Pow10(dicimal))
-
-	units := []time.Duration{time.Second, time.Millisecond, time.Microsecond, time.Nanosecond}
-	for _, u := range units {
-		if d > u {
-			div := u / time.Duration(shift)
-			if div == 0 {
-				break
-			}
-			d = d / div * div
-			break
-		}
-	}
-
-	return d
 }

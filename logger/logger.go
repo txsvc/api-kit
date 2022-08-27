@@ -14,6 +14,8 @@ import (
 	"github.com/txsvc/stdlib/v2"
 )
 
+// FIXME: replace with https://github.com/labstack/gommon/blob/master/log/log.go
+
 type Level int
 
 const (

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/txsvc/stdlib/v2"
 
@@ -65,26 +64,4 @@ func InitCredentials(realm, userid string) settings.Credentials {
 		Token:     CreateSimpleToken(),
 		Expires:   0,
 	}
-}
-
-func key(part1, part2 string) string {
-	return strings.ToLower(part1 + "." + part2)
-}
-
-// FIXME: this is a VERY simple implementation
-func hasScope(target []string, scope string) bool {
-
-	scopes := strings.Split(scope, ",")
-	mustMatch := len(scopes)
-
-	for _, s := range scopes {
-		for _, ss := range target {
-			if s == ss {
-				mustMatch--
-				break
-			}
-		}
-	}
-
-	return mustMatch == 0
 }

@@ -1,27 +1,27 @@
-package internal
+package auth
 
 import (
 	"context"
 	"errors"
 	"net/http"
-	"os"
-	"path/filepath"
 	"strings"
-	"sync"
 
 	"github.com/labstack/echo/v4"
 
 	"github.com/txsvc/apikit/internal/settings"
+	"github.com/txsvc/apikit/logger"
 )
 
 const (
 	// default API scopes
-	ScopeApiRead   = "api:read"
+	ScopeApiRead   = "api:read" // that's the very minimum
 	ScopeApiWrite  = "api:write"
 	ScopeApiEdit   = "api:edit"
 	ScopeApiCreate = "api:create"
 	ScopeApiDelete = "api:delete"
 	ScopeApiAdmin  = "api:admin"
+	// block access
+	ScopeApiNoAccess = "api:noaccess"
 )
 
 var (
@@ -29,18 +29,21 @@ var (
 	ErrNotAuthorized     = errors.New("not authorized")
 	ErrAlreadyAuthorized = errors.New("already authorized")
 
+	// ErrAlreadyInitialized indicates that client is already registered
+	ErrAlreadyInitialized = errors.New("already initialized")
+
 	// ErrNoToken indicates that no bearer token was provided
 	ErrNoToken = errors.New("no token provided")
 	// ErrNoScope indicates that no scope was provided
 	ErrNoScope = errors.New("no scope provided")
 
-	// different types of lookup tables
-	tokenToAuth map[string]*settings.Settings
-	idToAuth    map[string]*settings.Settings
-	mu          sync.Mutex // used to protect the above maps
+	// logger for this package
+	_log logger.Logger
 )
 
 func init() {
+	_log = logger.New()
+
 	// just empty maps to avoid any NPEs
 	FlushAuthorizations("")
 }
@@ -54,8 +57,8 @@ func CheckAuthorization(ctx context.Context, c echo.Context, scope string) (*set
 		return nil, err
 	}
 
-	auth, err := FindAuthorizationByToken(ctx, token)
-	if err != nil || auth == nil {
+	auth, err := cache.LookupByToken(token)
+	if err != nil || auth == nil || !auth.Credentials.IsValid() {
 		return nil, ErrNotAuthorized
 	}
 
@@ -89,45 +92,20 @@ func GetBearerToken(r *http.Request) (string, error) {
 	return "", ErrNoToken
 }
 
-func FlushAuthorizations(root string) {
-	mu.Lock()
-	defer mu.Unlock()
+// FIXME: this is a VERY simple implementation
+func hasScope(target []string, scope string) bool {
 
-	tokenToAuth = make(map[string]*settings.Settings)
-	idToAuth = make(map[string]*settings.Settings)
+	scopes := strings.Split(scope, ",")
+	mustMatch := len(scopes)
 
-	if root != "" {
-		filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
-			if !info.IsDir() {
-				cfg, err := ReadSettingsFromFile(path)
-				if err != nil {
-					return err // FIXME: this is never checked on exit !
-				}
-				RegisterAuthorization(cfg)
+	for _, s := range scopes {
+		for _, ss := range target {
+			if s == ss {
+				mustMatch--
+				break
 			}
-			return nil
-		})
+		}
 	}
-}
 
-func RegisterAuthorization(cfg *settings.Settings) {
-	tokenToAuth[cfg.Credentials.Token] = cfg
-	idToAuth[key(cfg.Credentials.ProjectID, cfg.Credentials.UserID)] = cfg
-}
-
-func LookupAuthorization(ctx context.Context, realm, userid string) (*settings.Settings, error) {
-	if a, ok := idToAuth[key(realm, userid)]; ok {
-		return a, nil
-	}
-	return nil, nil // FIXME: return an error ?
-}
-
-func FindAuthorizationByToken(ctx context.Context, token string) (*settings.Settings, error) {
-	if token == "" {
-		return nil, ErrNoToken
-	}
-	if a, ok := tokenToAuth[token]; ok {
-		return a, nil
-	}
-	return nil, nil // FIXME: return an error ?
+	return mustMatch == 0
 }
