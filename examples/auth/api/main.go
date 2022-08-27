@@ -15,8 +15,8 @@ import (
 	"github.com/txsvc/apikit"
 	"github.com/txsvc/apikit/api"
 	"github.com/txsvc/apikit/config"
-	"github.com/txsvc/apikit/internal"
 	"github.com/txsvc/apikit/internal/auth"
+	"github.com/txsvc/apikit/internal/settings"
 )
 
 func init() {
@@ -28,22 +28,11 @@ func init() {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		os.MkdirAll(filepath.Dir(path), os.ModePerm)
 
-		// create credentials and keys
-		cfg, err := internal.InitSettings(config.Name(), config.Name())
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		// defaults from this config provider
-		def := config.GetDefaultSettings()
-
-		// copy the credentials and api keys
-		def.Credentials = cfg.Credentials
-		def.APIKey = cfg.APIKey
-		def.Scopes = append(def.Scopes, auth.ScopeApiAdmin)
+		// create credentials and keys with defaults from this config provider
+		cfg := config.GetDefaultSettings()
 
 		// save the new configuration
-		def.WriteToFile(path)
+		settings.WriteSettingsToFile(cfg, path)
 	}
 
 	// initialize the credentials store

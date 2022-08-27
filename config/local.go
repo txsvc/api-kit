@@ -7,7 +7,6 @@ import (
 
 	"github.com/txsvc/stdlib/v2"
 
-	"github.com/txsvc/apikit/internal"
 	"github.com/txsvc/apikit/internal/auth"
 	"github.com/txsvc/apikit/internal/settings"
 )
@@ -105,11 +104,11 @@ func (c *localConfig) GetSettings() *settings.Settings {
 
 	// try to load the dial settings
 	pathToFile := filepath.Join(ResolveConfigLocation(), DefaultConfigFileName)
-	cs, err := internal.ReadSettingsFromFile(pathToFile) // FIXME: internal. will become an issue later
+	cfg, err := settings.ReadSettingsFromFile(pathToFile)
 	if err != nil {
-		cs = GetDefaultSettings()
+		cfg = GetDefaultSettings()
 		// save to the default location
-		if err = cs.WriteToFile(pathToFile); err != nil {
+		if err = settings.WriteSettingsToFile(cfg, pathToFile); err != nil {
 			log.Fatal(err)
 		}
 	}
@@ -117,8 +116,8 @@ func (c *localConfig) GetSettings() *settings.Settings {
 	// patch values from ENV if available
 
 	// make it available for further call
-	c.settings = cs
-	return cs
+	c.settings = cfg
+	return cfg
 }
 
 func (c *localConfig) GetDefaultSettings() *settings.Settings {

@@ -5,10 +5,7 @@
 package settings
 
 import (
-	"encoding/json"
 	"io/fs"
-	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/txsvc/stdlib/v2"
@@ -115,19 +112,6 @@ func (ds *Settings) SetOption(opt, o string) {
 	ds.Options[opt] = o
 }
 
-func (ds *Settings) WriteToFile(path string) error {
-	cfg, err := json.MarshalIndent(ds, "", indentChar)
-	if err != nil {
-		return err
-	}
-
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		os.MkdirAll(filepath.Dir(path), os.ModePerm)
-	}
-
-	return os.WriteFile(path, cfg, filePerm)
-}
-
 func (c *Credentials) Clone() *Credentials {
 	return &Credentials{
 		ProjectID: c.ProjectID,
@@ -152,17 +136,4 @@ func (c *Credentials) IsValid() bool {
 		return true
 	}
 	return c.Expires > stdlib.Now()
-}
-
-func (cred *Credentials) WriteToFile(path string) error {
-	cfg, err := json.MarshalIndent(cred, "", indentChar)
-	if err != nil {
-		return err
-	}
-
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		os.MkdirAll(filepath.Dir(path), os.ModePerm)
-	}
-
-	return os.WriteFile(path, cfg, filePerm)
 }

@@ -5,12 +5,13 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+
+	"github.com/txsvc/stdlib/v2"
+
 	"github.com/txsvc/apikit/config"
 	"github.com/txsvc/apikit/helpers"
-	"github.com/txsvc/apikit/internal"
 	"github.com/txsvc/apikit/internal/auth"
 	"github.com/txsvc/apikit/internal/settings"
-	"github.com/txsvc/stdlib/v2"
 )
 
 const (
@@ -62,7 +63,7 @@ func InitEndpoint(c echo.Context) error {
 	}
 
 	// prepare the settings for registration
-	cfg.Credentials.Token = internal.CreateSimpleToken() // ignore anything that was provided
+	cfg.Credentials.Token = CreateSimpleToken() // ignore anything that was provided
 	cfg.Credentials.Expires = stdlib.IncT(stdlib.Now(), LoginExpiresAfter)
 	cfg.APIKey = _cfg.APIKey
 	cfg.Status = settings.StateInit // signals init
@@ -123,7 +124,7 @@ func LoginEndpoint(c echo.Context) error {
 	// everything checks out, create/register the real credentials now ...
 	cfg := _cfg.Clone()         // clone, otherwise stupid things happen with pointers !
 	cfg.Credentials.Expires = 0 // FIXME: really never ?
-	cfg.Credentials.Token = internal.CreateSimpleToken()
+	cfg.Credentials.Token = CreateSimpleToken()
 	cfg.Status = settings.StateAuthorized
 
 	// FIXME: what about scopes ?
@@ -185,4 +186,9 @@ func LogoutEndpoint(c echo.Context) error {
 // signature returns a MD5(apiKey+token) as this is only known locally ...
 func signature(apiKey, token string) string {
 	return stdlib.Fingerprint(fmt.Sprintf("%s%s", apiKey, token))
+}
+
+func CreateSimpleToken() string {
+	token, _ := stdlib.UUID()
+	return token
 }

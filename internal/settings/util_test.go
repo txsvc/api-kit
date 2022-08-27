@@ -1,18 +1,16 @@
-package internal
+package settings
 
 import (
 	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
-	"github.com/txsvc/apikit/internal/settings"
 )
 
 const testCredentialFile = "test.json"
 
 func TestWriteReadSettings(t *testing.T) {
-	settings1 := &settings.Settings{
+	settings1 := &Settings{
 		Endpoint: "x",
 		//DefaultEndpoint: "X",
 		Scopes:        []string{"a", "b"},
@@ -23,7 +21,7 @@ func TestWriteReadSettings(t *testing.T) {
 	settings1.SetOption("FOO", "x")
 	settings1.SetOption("BAR", "x")
 
-	err := settings1.WriteToFile(testCredentialFile)
+	err := WriteSettingsToFile(settings1, testCredentialFile)
 	assert.NoError(t, err)
 
 	settings2, err := ReadSettingsFromFile(testCredentialFile)
@@ -36,14 +34,14 @@ func TestWriteReadSettings(t *testing.T) {
 }
 
 func TestWriteReadCredentials(t *testing.T) {
-	cred1 := &settings.Credentials{
+	cred1 := &Credentials{
 		ProjectID: "project",
 		UserID:    "user",
 		Token:     "token",
 		Expires:   42,
 	}
 
-	err := cred1.WriteToFile(testCredentialFile)
+	err := WriteCredentialsToFile(cred1, testCredentialFile)
 	assert.NoError(t, err)
 
 	cred2, err := ReadCredentialsFromFile(testCredentialFile)

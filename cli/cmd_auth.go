@@ -12,7 +12,6 @@ import (
 	"github.com/txsvc/apikit/api"
 	"github.com/txsvc/apikit/config"
 	"github.com/txsvc/apikit/helpers"
-	"github.com/txsvc/apikit/internal"
 	"github.com/txsvc/apikit/internal/auth"
 	"github.com/txsvc/apikit/internal/settings"
 	"github.com/txsvc/apikit/logger"
@@ -108,7 +107,7 @@ func InitCommand(c *cli.Context) error {
 	cfg.Credentials = &settings.Credentials{
 		ProjectID: config.Name(),
 		UserID:    userid,
-		Token:     internal.CreateSimpleToken(),
+		Token:     api.CreateSimpleToken(),
 		Expires:   0, // FIXME: should this expire after some time?
 	}
 	cfg.Status = settings.StateInit
@@ -126,7 +125,7 @@ func InitCommand(c *cli.Context) error {
 
 	// finally save the file
 	pathToFile := filepath.Join(config.ResolveConfigLocation(), config.DefaultConfigFileName)
-	if err := cfg.WriteToFile(pathToFile); err != nil {
+	if err := settings.WriteSettingsToFile(cfg, pathToFile); err != nil {
 		return config.ErrInitializingConfiguration
 	}
 
@@ -170,7 +169,7 @@ func LoginCommand(c *cli.Context) error {
 	}
 
 	pathToFile := filepath.Join(config.ResolveConfigLocation(), config.DefaultConfigFileName)
-	if err := cfg.WriteToFile(pathToFile); err != nil {
+	if err := settings.WriteSettingsToFile(cfg, pathToFile); err != nil {
 		return config.ErrInitializingConfiguration
 	}
 
@@ -205,7 +204,7 @@ func LogoutCommand(c *cli.Context) error {
 	cfg.Status = settings.StateUndefined // LOGGED_OUT
 
 	pathToFile := filepath.Join(config.ResolveConfigLocation(), config.DefaultConfigFileName)
-	if err := cfg.WriteToFile(pathToFile); err != nil {
+	if err := settings.WriteSettingsToFile(cfg, pathToFile); err != nil {
 		return config.ErrInitializingConfiguration
 	}
 
