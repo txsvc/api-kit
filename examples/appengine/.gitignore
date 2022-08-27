@@ -14,7 +14,6 @@ app.yaml
 coverage.txt
 /hack/
 bin/
-stuff.md
 
 # Test binary, built with `go test -c`
 *.test
