@@ -18,6 +18,8 @@ const (
 	InitRoute   = "/auth"
 	LoginRoute  = "/auth/:sig/:token"
 	LogoutRoute = "/auth/:sig"
+
+	LoginExpiresAfter = 15
 )
 
 func WithAuthEndpoints(e *echo.Echo) *echo.Echo {
@@ -60,8 +62,8 @@ func InitEndpoint(c echo.Context) error {
 	}
 
 	// prepare the settings for registration
-	cfg.Credentials.Token = internal.CreateSimpleToken()    // ignore anything that was provided
-	cfg.Credentials.Expires = stdlib.IncT(stdlib.Now(), 15) // FIXME: config, valid for 15min
+	cfg.Credentials.Token = internal.CreateSimpleToken() // ignore anything that was provided
+	cfg.Credentials.Expires = stdlib.IncT(stdlib.Now(), LoginExpiresAfter)
 	cfg.APIKey = _cfg.APIKey
 	cfg.Status = settings.StateInit // signals init
 
@@ -111,6 +113,11 @@ func LoginEndpoint(c echo.Context) error {
 	// compare provided signature with the expected signature
 	if sig != signature(_cfg.APIKey, _cfg.Credentials.Token) {
 		return ErrorResponse(c, http.StatusBadRequest, config.ErrInitializingConfiguration, "invalid sig")
+	}
+
+	// check if the token is still valid
+	if _cfg.Credentials.Expires < stdlib.Now() {
+		return ErrorResponse(c, http.StatusBadRequest, auth.ErrTokenExpired, "expired")
 	}
 
 	// everything checks out, create/register the real credentials now ...

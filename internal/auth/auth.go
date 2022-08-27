@@ -34,6 +34,9 @@ var (
 
 	// ErrNoToken indicates that no bearer token was provided
 	ErrNoToken = errors.New("no token provided")
+	// ErrTokenExpired indicates that the token is no longer valid
+	ErrTokenExpired = errors.New("token expired")
+
 	// ErrNoScope indicates that no scope was provided
 	ErrNoScope = errors.New("no scope provided")
 
