@@ -69,8 +69,15 @@ func (c *localConfig) FixVersion() int {
 	return fixVersion
 }
 
-func (c *localConfig) DefaultConfigLocation() string {
-	return DefaultConfigDirLocation
+//
+//
+//
+
+func (c *localConfig) DefaultScopes() []string {
+	return []string{
+		auth.ScopeApiRead,
+		auth.ScopeApiWrite,
+	}
 }
 
 // GetConfigLocation returns the config location that was set using SetConfigLocation().
@@ -87,15 +94,8 @@ func (c *localConfig) SetConfigLocation(loc string) {
 	c.confDir = loc
 }
 
-func (c *localConfig) GetDefaultSettings() *settings.Settings {
-	return &settings.Settings{
-		Endpoint: "http://localhost:8080",
-		DefaultScopes: []string{
-			auth.ScopeApiRead,
-			auth.ScopeApiWrite,
-		},
-		Credentials: &settings.Credentials{}, // add this to avoid NPEs further down
-	}
+func (c *localConfig) DefaultConfigLocation() string {
+	return DefaultConfigDirLocation
 }
 
 func (c *localConfig) GetSettings() *settings.Settings {
@@ -119,4 +119,12 @@ func (c *localConfig) GetSettings() *settings.Settings {
 	// make it available for further call
 	c.settings = cs
 	return cs
+}
+
+func (c *localConfig) GetDefaultSettings() *settings.Settings {
+	return &settings.Settings{
+		Endpoint:      "http://localhost:8080",
+		DefaultScopes: c.DefaultScopes(),
+		Credentials:   &settings.Credentials{}, // add this to avoid NPEs further down
+	}
 }

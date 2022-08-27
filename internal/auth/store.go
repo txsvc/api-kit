@@ -67,15 +67,19 @@ func UpdateStore(cfg *settings.Settings) error {
 
 func (c *authCache) Register(cfg *settings.Settings) error {
 
-	_log.Debugf("register auth. key=%s/%s", fileName(cfg.Credentials), cfg.Credentials.Token)
+	_log.Debugf("register. t=%s/%s", cfg.Credentials.Token, fileName(cfg.Credentials))
 
 	// check if the settings already exists
 	if a, ok := c.idToAuth[cfg.Credentials.Key()]; ok {
-		if a.Status != -2 {
-			return ErrAlreadyInitialized // already exists
+		if a.Status == settings.StateAuthorized {
+			_log.Errorf("already authorized. t=%s, state=%d", a.Credentials.Token, a.Status)
+			return ErrAlreadyAuthorized
 		}
-		// it is OK to overwrite while still in the the init phase
-		delete(c.tokenToAuth, a.Credentials.Token) // FIXME: remove from tokenToAut
+
+		// remove from token lookup if the token changed
+		if a.Credentials.Token != cfg.Credentials.Token {
+			delete(c.tokenToAuth, a.Credentials.Token)
+		}
 	}
 
 	// write to the file store
@@ -92,7 +96,7 @@ func (c *authCache) Register(cfg *settings.Settings) error {
 }
 
 func (c *authCache) LookupByToken(token string) (*settings.Settings, error) {
-	_log.Debugf("lookupByToken=%s", token)
+	_log.Debugf("lookup. t=%s", token)
 
 	if token == "" {
 		return nil, ErrNoToken

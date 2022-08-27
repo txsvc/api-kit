@@ -40,30 +40,37 @@ func (c *Client) InitCommand(cfg *settings.Settings) error {
 
 func InitEndpoint(c echo.Context) error {
 	// get the payload
-	var cfg *settings.Settings = new(settings.Settings)
-	if err := c.Bind(cfg); err != nil {
+	var _cfg *settings.Settings = new(settings.Settings)
+	if err := c.Bind(_cfg); err != nil {
 		return StandardResponse(c, http.StatusBadRequest, nil)
 	}
 
 	// pre-validate the request
-	if cfg.Credentials == nil || cfg.APIKey == "" {
+	if _cfg.Credentials == nil || _cfg.APIKey == "" {
 		return StandardResponse(c, http.StatusBadRequest, nil)
 	}
-	if cfg.Credentials.ProjectID == "" || cfg.Credentials.UserID == "" {
+	if _cfg.Credentials.ProjectID == "" || _cfg.Credentials.UserID == "" {
 		return StandardResponse(c, http.StatusBadRequest, nil)
+	}
+
+	// create a brand new instance so that the client can't sneak anything in we don't want
+	cfg := settings.Settings{
+		Credentials:   _cfg.Credentials.Clone(),
+		DefaultScopes: config.GetDefaultScopes(),
 	}
 
 	// prepare the settings for registration
 	cfg.Credentials.Token = internal.CreateSimpleToken()    // ignore anything that was provided
 	cfg.Credentials.Expires = stdlib.IncT(stdlib.Now(), 15) // FIXME: config, valid for 15min
-	cfg.Status = -2                                         // signals init
+	cfg.APIKey = _cfg.APIKey
+	cfg.Status = settings.StateInit // signals init
 
-	if err := auth.RegisterAuthorization(cfg); err != nil {
+	if err := auth.RegisterAuthorization(&cfg); err != nil {
 		return StandardResponse(c, http.StatusBadRequest, nil) // FIXME: or 409/Conflict ?
 	}
 
 	// all good so far, send the confirmation
-	err := helpers.MailgunSimpleEmail("ops@txs.vc", cfg.Credentials.UserID, "auth", fmt.Sprintf("the token: %s\n", cfg.Credentials.Token))
+	err := helpers.MailgunSimpleEmail("ops@txs.vc", cfg.Credentials.UserID, fmt.Sprintf("your api access credentials (%d)", stdlib.Now()), fmt.Sprintf("the token: %s\n", cfg.Credentials.Token))
 	if err != nil {
 		return StandardResponse(c, http.StatusBadRequest, nil)
 	}
@@ -110,7 +117,7 @@ func LoginEndpoint(c echo.Context) error {
 	cfg := _cfg.Clone()         // clone, otherwise stupid things happen with pointers !
 	cfg.Credentials.Expires = 0 // FIXME: really never ?
 	cfg.Credentials.Token = internal.CreateSimpleToken()
-	cfg.Status = 1 // FIXME: LOGGED_IN as const
+	cfg.Status = settings.StateAuthorized
 
 	// FIXME: what about scopes ?
 
@@ -159,7 +166,7 @@ func LogoutEndpoint(c echo.Context) error {
 	}
 
 	// update the cache and store
-	cfg.Status = -1 // just set to invalid and expired
+	cfg.Status = settings.StateUndefined // just set to invalid and expired
 	cfg.Credentials.Expires = stdlib.Now() - 1
 	if err := auth.UpdateStore(cfg); err != nil {
 		return ErrorResponse(c, http.StatusBadRequest, err, "update store")

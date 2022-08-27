@@ -75,22 +75,35 @@ func InitCommand(c *cli.Context) error {
 	// load settings
 	cfg := config.GetSettings()
 
+	// get a client instance
+	cl, err := api.NewClient(cfg, logger.New())
+	if err != nil {
+		return err // FIXME: better err or just pass on what comes?
+	}
+
 	// if a passphrase was provided and the fingerprint(realm,userid,phrase) matches the API key,
 	// then the user is re-initializing an existing account which is allowed. The client just
 	// sends a logout request first before initiating the normal auth sequence.
 
 	_apiKey := stdlib.Fingerprint(fmt.Sprintf("%s%s%s", config.Name(), userid, mnemonic))
 
-	if cfg.Status != -2 {
-		if cfg.APIKey == _apiKey {
-			// FIXME: send logout
-			fmt.Println("logout")
-		} else {
-			if cfg.Credentials.Token != "" {
-				return auth.ErrAlreadyInitialized // FIXME: can we do better ?
+	switch cfg.Status {
+	case -1:
+		// set to INVALID
+		return config.ErrInvalidConfiguration
+	case 1:
+		if _apiKey == cfg.APIKey {
+			// correct pass phrase was provided, reset the authentication
+			if err := cl.LogoutCommand(); err != nil {
+				return err // FIXME: better err or just pass on what comes?
 			}
+		} else {
+			// already authenticated, abort
+			return auth.ErrAlreadyAuthorized
 		}
 	}
+
+	// 0, -2: don't care, can be overwritten as the client is not authorized yet
 
 	cfg.Credentials = &settings.Credentials{
 		ProjectID: config.Name(),
@@ -98,14 +111,14 @@ func InitCommand(c *cli.Context) error {
 		Token:     internal.CreateSimpleToken(),
 		Expires:   0, // FIXME: should this expire after some time?
 	}
-	cfg.Status = -2
+	cfg.Status = settings.StateInit
 	cfg.APIKey = _apiKey
+	cfg.Scopes = make([]string, 0)
+	cfg.DefaultScopes = make([]string, 0)
+	cfg.Options = make(map[string]string)
 
 	// now start the auth init process with the API
-	cl, err := api.NewClient(cfg, logger.New())
-	if err != nil {
-		return err // FIXME: better err or just pass on what comes?
-	}
+
 	err = cl.InitCommand(cfg)
 	if err != nil {
 		return err // FIXME: better err or just pass on what comes?
@@ -151,7 +164,7 @@ func LoginCommand(c *cli.Context) error {
 
 	// update the local config
 	cfg.Credentials.Token = status.Message
-	cfg.Status = 1 // LOGGED_IN
+	cfg.Status = settings.StateAuthorized // LOGGED_IN
 	if !cfg.Credentials.IsValid() {
 		return config.ErrInvalidConfiguration
 	}
@@ -189,7 +202,7 @@ func LogoutCommand(c *cli.Context) error {
 
 	// update the local config
 	cfg.Credentials.Expires = stdlib.Now() - 1
-	cfg.Status = -1 // LOGGED_OUT
+	cfg.Status = settings.StateUndefined // LOGGED_OUT
 
 	pathToFile := filepath.Join(config.ResolveConfigLocation(), config.DefaultConfigFileName)
 	if err := cfg.WriteToFile(pathToFile); err != nil {

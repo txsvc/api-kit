@@ -15,11 +15,18 @@ import (
 )
 
 const (
+	StateInit State = iota - 2
+	StateInvalid
+	StateUndefined  // logged out
+	StateAuthorized // logged in
+
 	indentChar             = "  "
 	filePerm   fs.FileMode = 0644
 )
 
 type (
+	State int
+
 	// Settings holds information needed to establish a connection with a
 	// backend API service or to simply configure some code.
 	Settings struct {
@@ -29,7 +36,7 @@ type (
 		DefaultScopes []string `json:"default_scopes,omitempty"`
 
 		Credentials *Credentials `json:"credentials,omitempty"`
-		Status      int          `json:"status,omitempty"`
+		Status      State        `json:"status,omitempty"`
 
 		//InternalCredentials *Credentials `json:"internal_credentials,omitempty"`
 		//CredentialsFile     string       `json:"credentials_file,omitempty"`

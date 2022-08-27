@@ -23,6 +23,7 @@ type (
 	ConfigProviderFunc func() interface{}
 
 	Configurator interface {
+		// FIXME: move this to a struct ...
 		Name() string      // name of the project / the real etc
 		ShortName() string // abreviated name, used for e.g. the cli tool
 		Copyright() string
@@ -32,14 +33,16 @@ type (
 		MinorVersion() int
 		FixVersion() int
 
-		DefaultConfigLocation() string // default: ./.config
+		// FIXME: keep this in the configurator
+		DefaultScopes() []string
 
 		GetConfigLocation() string // same as DefaultConfigLocation() unless explicitly set
 		SetConfigLocation(string)
+		DefaultConfigLocation() string // default: ./.config
 
 		// client & endpoint settings and credentials
-		GetDefaultSettings() *settings.Settings
 		GetSettings() *settings.Settings
+		GetDefaultSettings() *settings.Settings
 	}
 )
 
@@ -123,12 +126,15 @@ func FixVersion() int {
 	return confProvider.(Configurator).FixVersion()
 }
 
-// DefaultConfigLocation returns a default location e.g. %HOME/.config
-func DefaultConfigLocation() string {
+//
+//
+//
+
+func GetDefaultScopes() []string {
 	if confProvider == nil {
 		log.Fatal(ErrMissingConfigurator)
 	}
-	return confProvider.(Configurator).DefaultConfigLocation()
+	return confProvider.(Configurator).DefaultScopes()
 }
 
 // ConfigLocation returns the actual location or DefaultConfigLocation() if undefined
@@ -145,6 +151,14 @@ func SetConfigLocation(loc string) {
 		log.Fatal(ErrMissingConfigurator)
 	}
 	confProvider.(Configurator).SetConfigLocation(loc)
+}
+
+// DefaultConfigLocation returns a default location e.g. %HOME/.config
+func DefaultConfigLocation() string {
+	if confProvider == nil {
+		log.Fatal(ErrMissingConfigurator)
+	}
+	return confProvider.(Configurator).DefaultConfigLocation()
 }
 
 // ResolveConfigLocation returns the full path to the config location
