@@ -94,7 +94,7 @@ func pingEndpoint(c echo.Context) error {
 
 	resp := api.StatusObject{
 		Status:  http.StatusOK,
-		Message: fmt.Sprintf("version: %s", config.VersionString()),
+		Message: fmt.Sprintf("version: %s", config.AppInfo().VersionString()),
 	}
 
 	return api.StandardResponse(c, http.StatusOK, resp)

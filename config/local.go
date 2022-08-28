@@ -13,8 +13,12 @@ import (
 
 type (
 	localConfig struct {
-		rootDir  string // the current working dir
-		confDir  string // the fully qualified path to the conf dir
+		// app info
+		info *Info
+		// path to configuration settings
+		rootDir string // the current working dir
+		confDir string // the fully qualified path to the conf dir
+		// cached settings
 		settings *settings.Settings
 	}
 )
@@ -35,42 +39,23 @@ func NewLocalConfigProvider() interface{} {
 	c := &localConfig{
 		rootDir: dir,
 		confDir: "",
+		info: &Info{
+			name:         "appkit",
+			shortName:    "appkit",
+			copyright:    "Copyright 2022, transformative.services, https://txs.vc",
+			about:        "about appkit",
+			majorVersion: majorVersion,
+			minorVersion: minorVersion,
+			fixVersion:   fixVersion,
+		},
 	}
 
 	return c
 }
 
-func (c *localConfig) Name() string {
-	return "simplecli"
+func (c *localConfig) AppInfo() *Info {
+	return c.info
 }
-
-func (c *localConfig) ShortName() string {
-	return "sc"
-}
-
-func (c *localConfig) Copyright() string {
-	return "Copyright 2022, transformative.services, https://txs.vc"
-}
-
-func (c *localConfig) About() string {
-	return "a simple cli (sc) example"
-}
-
-func (c *localConfig) MajorVersion() int {
-	return majorVersion
-}
-
-func (c *localConfig) MinorVersion() int {
-	return minorVersion
-}
-
-func (c *localConfig) FixVersion() int {
-	return fixVersion
-}
-
-//
-//
-//
 
 func (c *localConfig) DefaultScopes() []string {
 	return []string{

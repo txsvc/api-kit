@@ -84,7 +84,7 @@ func InitCommand(c *cli.Context) error {
 	// then the user is re-initializing an existing account which is allowed. The client just
 	// sends a logout request first before initiating the normal auth sequence.
 
-	_apiKey := stdlib.Fingerprint(fmt.Sprintf("%s%s%s", config.Name(), userid, mnemonic))
+	_apiKey := stdlib.Fingerprint(fmt.Sprintf("%s%s%s", config.AppInfo().Name(), userid, mnemonic))
 
 	switch cfg.Status {
 	case -1:
@@ -105,7 +105,7 @@ func InitCommand(c *cli.Context) error {
 	// 0, -2: don't care, can be overwritten as the client is not authorized yet
 
 	cfg.Credentials = &settings.Credentials{
-		ProjectID: config.Name(),
+		ProjectID: config.AppInfo().Name(),
 		UserID:    userid,
 		Token:     api.CreateSimpleToken(),
 		Expires:   0, // FIXME: should this expire after some time?

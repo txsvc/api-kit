@@ -63,8 +63,8 @@ func NewClient(cfg *settings.Settings, logger logger.Logger) (*Client, error) {
 		httpClient: httpClient,
 		cfg:        _cfg,
 		logger:     logger,
-		userAgent:  config.UserAgentString(),
-		trace:      stdlib.GetString("APIKIT_FORCE_TRACE", ""),
+		userAgent:  config.AppInfo().UserAgentString(),
+		trace:      stdlib.GetString(config.ForceTraceEnv, ""),
 	}, nil
 }
 

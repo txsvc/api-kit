@@ -20,10 +20,10 @@ func init() {
 func main() {
 	// initialize the CLI
 	app := &cli.App{
-		Name:      config.ShortName(),
-		Version:   config.VersionString(),
-		Usage:     config.About(),
-		Copyright: config.Copyright(),
+		Name:      config.AppInfo().ShortName(),
+		Version:   config.AppInfo().VersionString(),
+		Usage:     config.AppInfo().About(),
+		Copyright: config.AppInfo().Copyright(),
 		Commands:  setupCommands(),
 		Flags:     setupFlags(),
 		Before: func(c *cli.Context) error {

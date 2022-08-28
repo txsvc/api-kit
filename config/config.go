@@ -2,7 +2,6 @@ package config
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -12,28 +11,34 @@ import (
 )
 
 const (
+	// runtime settings
+	PortEnv        = "PORT"
+	APIEndpointENV = "API_ENDPOINT"
+	// client settings
+	ForceTraceEnv = "APIKIT_FORCE_TRACE"
+	// config settings
+	ConfigDirLocationENV = "CONFIG_LOCATION"
+
 	DefaultConfigDirLocation = "./.config"
 	DefaultConfigFileName    = "config"
-
-	ConfigDirLocationENV = "CONFIG_LOCATION"
-	APIEndpointENV       = "API_ENDPOINT"
 )
 
 type (
+	Info struct {
+		name         string
+		shortName    string
+		copyright    string
+		about        string
+		majorVersion int
+		minorVersion int
+		fixVersion   int
+	}
+
 	ConfigProviderFunc func() interface{}
 
 	Configurator interface {
-		// FIXME: move this to a struct ...
-		Name() string      // name of the project / the real etc
-		ShortName() string // abreviated name, used for e.g. the cli tool
-		Copyright() string
-		About() string
+		AppInfo() *Info
 
-		MajorVersion() int
-		MinorVersion() int
-		FixVersion() int
-
-		// FIXME: keep this in the configurator
 		DefaultScopes() []string
 
 		GetConfigLocation() string // same as DefaultConfigLocation() unless explicitly set
@@ -54,81 +59,29 @@ var (
 	// ErrInvalidConfiguration indicates that parameters used to configure the service were invalid
 	ErrInvalidConfiguration = errors.New("invalid configuration")
 
+	// the config "singleton"
 	confProvider interface{}
 )
 
 func init() {
 	// makes sure that SOMETHING is initialized
-	InitConfigProvider(NewSimpleConfigProvider())
+	InitConfigProvider(NewLocalConfigProvider())
 }
 
 func InitConfigProvider(provider interface{}) {
 	confProvider = provider
 }
 
-func VersionString() string {
-	return fmt.Sprintf("%d.%d.%d", MajorVersion(), MinorVersion(), FixVersion())
-}
-
-func UserAgentString() string {
-	return fmt.Sprintf("%s %d.%d.%d", ShortName(), MajorVersion(), MinorVersion(), FixVersion())
-}
-
-func ServerString() string {
-	return fmt.Sprintf("%s %d.%d.%d", ShortName(), MajorVersion(), MinorVersion(), FixVersion())
-}
-
-func Name() string {
-	if confProvider == nil {
-		log.Fatal(ErrMissingConfigurator)
-	}
-	return confProvider.(Configurator).Name()
-}
-
-func ShortName() string {
-	if confProvider == nil {
-		log.Fatal(ErrMissingConfigurator)
-	}
-	return confProvider.(Configurator).ShortName()
-}
-
-func Copyright() string {
-	if confProvider == nil {
-		log.Fatal(ErrMissingConfigurator)
-	}
-	return confProvider.(Configurator).Copyright()
-}
-
-func About() string {
-	if confProvider == nil {
-		log.Fatal(ErrMissingConfigurator)
-	}
-	return confProvider.(Configurator).About()
-}
-
-func MajorVersion() int {
-	if confProvider == nil {
-		log.Fatal(ErrMissingConfigurator)
-	}
-	return confProvider.(Configurator).MajorVersion()
-}
-
-func MinorVersion() int {
-	if confProvider == nil {
-		log.Fatal(ErrMissingConfigurator)
-	}
-	return confProvider.(Configurator).MinorVersion()
-}
-func FixVersion() int {
-	if confProvider == nil {
-		log.Fatal(ErrMissingConfigurator)
-	}
-	return confProvider.(Configurator).FixVersion()
-}
-
 //
+// "static" functions to match Configurator interface
 //
-//
+
+func AppInfo() *Info {
+	if confProvider == nil {
+		log.Fatal(ErrMissingConfigurator)
+	}
+	return confProvider.(Configurator).AppInfo()
+}
 
 func GetDefaultScopes() []string {
 	if confProvider == nil {

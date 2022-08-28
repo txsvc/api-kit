@@ -18,11 +18,27 @@ import (
 	"github.com/txsvc/apikit/internal/settings"
 )
 
+const (
+	// MajorVersion of the API
+	majorVersion = 0
+	// MinorVersion of the API
+	minorVersion = 1
+	// FixVersion of the API
+	fixVersion = 0
+)
+
+type (
+	appConfig struct {
+		root string // the fully qualified path to the conf dir
+		info *config.Info
+	}
+)
+
 // FIXME: implement in memory certstore
 
 func init() {
 	// initialize the config provider
-	config.InitConfigProvider(config.NewSimpleConfigProvider())
+	config.InitConfigProvider(NewAppEngineConfigProvider())
 
 	// create a default configuration for the service (if none exists)
 	path := filepath.Join(config.ResolveConfigLocation(), config.DefaultConfigFileName)
@@ -85,8 +101,24 @@ func pingEndpoint(c echo.Context) error {
 
 	resp := api.StatusObject{
 		Status:  http.StatusOK,
-		Message: fmt.Sprintf("version: %s", config.VersionString()),
+		Message: fmt.Sprintf("version: %s", config.AppInfo().VersionString()),
 	}
 
 	return api.StandardResponse(c, http.StatusOK, resp)
+}
+
+func NewAppEngineConfigProvider() interface{} {
+	info := config.NewAppInfo(
+		"appengine kit",
+		"aek",
+		"Copyright 2022, transformative.services, https://txs.vc",
+		"about appengine kit",
+		majorVersion,
+		minorVersion,
+		fixVersion,
+	)
+
+	return &appConfig{
+		info: &info,
+	}
 }

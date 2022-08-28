@@ -12,6 +12,7 @@ import (
 	"golang.org/x/crypto/acme"
 	"golang.org/x/crypto/acme/autocert"
 
+	"github.com/txsvc/apikit/config"
 	"github.com/txsvc/stdlib/v2"
 	"github.com/txsvc/stdlib/v2/stdlibx/stringsx"
 )
@@ -38,7 +39,7 @@ func (a *App) listen(addr, certFile, keyFile string, useTLS bool) {
 	}()
 
 	if useTLS {
-		port := fmt.Sprintf(":%s", stringsx.TakeOne(stdlib.GetString("PORT", addr), PORT_DEFAULT_TLS))
+		port := fmt.Sprintf(":%s", stringsx.TakeOne(stdlib.GetString(config.PortEnv, addr), PORT_DEFAULT_TLS))
 		certDir := fmt.Sprintf("%s/.cert", a.root)
 
 		autoTLSManager := autocert.Manager{
@@ -61,7 +62,7 @@ func (a *App) listen(addr, certFile, keyFile string, useTLS bool) {
 		}
 	} else {
 		// simply startup without TLS
-		port := fmt.Sprintf(":%s", stringsx.TakeOne(stdlib.GetString("PORT", addr), PORT_DEFAULT))
+		port := fmt.Sprintf(":%s", stringsx.TakeOne(stdlib.GetString(config.PortEnv, addr), PORT_DEFAULT))
 		log.Fatal(a.mux.Start(port))
 	}
 }

@@ -23,6 +23,8 @@ const (
 	Info
 	Warn
 	Error
+
+	LogLevelEnv = "LOG_LEVEL"
 )
 
 type Logger struct {
@@ -44,7 +46,7 @@ func NewLogger(out io.Writer, lvl string) Logger {
 // levelFromEnv looks for ENV['LOG_LEVEL'], returns level Info by default
 func levelFromEnv(lvl string) Level {
 
-	lit := strings.ToLower(stdlib.GetString("LOG_LEVEL", lvl))
+	lit := strings.ToLower(stdlib.GetString(LogLevelEnv, lvl))
 
 	switch lit {
 	default:
