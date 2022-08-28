@@ -14,19 +14,19 @@ const (
 	filePerm   fs.FileMode = 0644
 )
 
-func ReadSettingsFromFile(path string) (*settings.Settings, error) {
+func ReadDialSettings(path string) (*settings.DialSettings, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
-	ds := settings.Settings{}
+	ds := settings.DialSettings{}
 	if err := json.Unmarshal([]byte(data), &ds); err != nil {
 		return nil, err
 	}
 	return &ds, nil
 }
 
-func WriteSettingsToFile(cfg *settings.Settings, path string) error {
+func WriteDialSettings(cfg *settings.DialSettings, path string) error {
 	buf, err := json.MarshalIndent(cfg, "", indentChar)
 	if err != nil {
 		return err
@@ -39,7 +39,7 @@ func WriteSettingsToFile(cfg *settings.Settings, path string) error {
 	return os.WriteFile(path, buf, filePerm)
 }
 
-func ReadCredentialsFromFile(path string) (*settings.Credentials, error) {
+func ReadCredentials(path string) (*settings.Credentials, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
@@ -51,7 +51,7 @@ func ReadCredentialsFromFile(path string) (*settings.Credentials, error) {
 	return &cred, nil
 }
 
-func WriteCredentialsToFile(cred *settings.Credentials, path string) error {
+func WriteCredentials(cred *settings.Credentials, path string) error {
 	buf, err := json.MarshalIndent(cred, "", indentChar)
 	if err != nil {
 		return err

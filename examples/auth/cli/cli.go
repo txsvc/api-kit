@@ -14,16 +14,17 @@ import (
 )
 
 func init() {
-	config.InitConfigProvider(config.NewLocalConfigProvider())
+	config.SetProvider(config.NewLocalConfigProvider())
 }
 
 func main() {
 	// initialize the CLI
+	cfg := config.GetConfig()
 	app := &cli.App{
-		Name:      config.AppInfo().ShortName(),
-		Version:   config.AppInfo().VersionString(),
-		Usage:     config.AppInfo().About(),
-		Copyright: config.AppInfo().Copyright(),
+		Name:      cfg.Info().ShortName(),
+		Version:   cfg.Info().VersionString(),
+		Usage:     cfg.Info().About(),
+		Copyright: cfg.Info().Copyright(),
 		Commands:  setupCommands(),
 		Flags:     setupFlags(),
 		Before: func(c *cli.Context) error {

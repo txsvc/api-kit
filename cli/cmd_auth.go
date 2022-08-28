@@ -72,7 +72,7 @@ func InitCommand(c *cli.Context) error {
 	}
 
 	// load settings
-	cfg := config.GetSettings()
+	cfg := config.GetConfig().Settings()
 
 	// get a client instance
 	cl, err := api.NewClient(cfg, logger.New())
@@ -84,7 +84,7 @@ func InitCommand(c *cli.Context) error {
 	// then the user is re-initializing an existing account which is allowed. The client just
 	// sends a logout request first before initiating the normal auth sequence.
 
-	_apiKey := stdlib.Fingerprint(fmt.Sprintf("%s%s%s", config.AppInfo().Name(), userid, mnemonic))
+	_apiKey := stdlib.Fingerprint(fmt.Sprintf("%s%s%s", config.GetConfig().Info().Name(), userid, mnemonic))
 
 	switch cfg.Status {
 	case -1:
@@ -105,7 +105,7 @@ func InitCommand(c *cli.Context) error {
 	// 0, -2: don't care, can be overwritten as the client is not authorized yet
 
 	cfg.Credentials = &settings.Credentials{
-		ProjectID: config.AppInfo().Name(),
+		ProjectID: config.GetConfig().Info().Name(),
 		UserID:    userid,
 		Token:     api.CreateSimpleToken(),
 		Expires:   0, // FIXME: should this expire after some time?
@@ -124,8 +124,8 @@ func InitCommand(c *cli.Context) error {
 	}
 
 	// finally save the file
-	pathToFile := filepath.Join(config.ResolveConfigLocation(), config.DefaultConfigFileName)
-	if err := helpers.WriteSettingsToFile(cfg, pathToFile); err != nil {
+	pathToFile := filepath.Join(config.ResolveConfigLocation(), config.DefaultConfigName)
+	if err := helpers.WriteDialSettings(cfg, pathToFile); err != nil {
 		return config.ErrInitializingConfiguration
 	}
 
@@ -146,7 +146,7 @@ func LoginCommand(c *cli.Context) error {
 	token := c.Args().First()
 
 	// load settings
-	cfg := config.GetSettings()
+	cfg := config.GetConfig().Settings()
 	if !cfg.Credentials.IsValid() {
 		return config.ErrInvalidConfiguration
 	}
@@ -168,8 +168,8 @@ func LoginCommand(c *cli.Context) error {
 		return config.ErrInvalidConfiguration
 	}
 
-	pathToFile := filepath.Join(config.ResolveConfigLocation(), config.DefaultConfigFileName)
-	if err := helpers.WriteSettingsToFile(cfg, pathToFile); err != nil {
+	pathToFile := filepath.Join(config.ResolveConfigLocation(), config.DefaultConfigName)
+	if err := helpers.WriteDialSettings(cfg, pathToFile); err != nil {
 		return config.ErrInitializingConfiguration
 	}
 
@@ -184,7 +184,7 @@ func LogoutCommand(c *cli.Context) error {
 	}
 
 	// load settings
-	cfg := config.GetSettings()
+	cfg := config.GetConfig().Settings()
 	if !cfg.Credentials.IsValid() {
 		return config.ErrInvalidConfiguration
 	}
@@ -203,8 +203,8 @@ func LogoutCommand(c *cli.Context) error {
 	cfg.Credentials.Expires = stdlib.Now() - 1
 	cfg.Status = settings.StateUndefined // LOGGED_OUT
 
-	pathToFile := filepath.Join(config.ResolveConfigLocation(), config.DefaultConfigFileName)
-	if err := helpers.WriteSettingsToFile(cfg, pathToFile); err != nil {
+	pathToFile := filepath.Join(config.ResolveConfigLocation(), config.DefaultConfigName)
+	if err := helpers.WriteDialSettings(cfg, pathToFile); err != nil {
 		return config.ErrInitializingConfiguration
 	}
 

@@ -10,7 +10,7 @@ func TestVersionStrings(t *testing.T) {
 	conf := NewLocalConfigProvider().(*localConfig)
 	assert.NotNil(t, conf)
 
-	info := conf.AppInfo()
+	info := conf.Info()
 	assert.NotNil(t, info)
 	assert.NotEmpty(t, info)
 

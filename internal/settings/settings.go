@@ -4,26 +4,19 @@
 // For details and copyright etc. see above url.
 package settings
 
-import (
-	"io/fs"
-)
-
 const (
-	StateInit State = iota - 2
-	StateInvalid
-	StateUndefined  // logged out
-	StateAuthorized // logged in
-
-	indentChar             = "  "
-	filePerm   fs.FileMode = 0644
+	StateInit       State = iota - 2 // waiting to swap tokens
+	StateInvalid                     // a config in this state should not be used
+	StateUndefined                   // logged out
+	StateAuthorized                  // logged in
 )
 
 type (
 	State int
 
-	// Settings holds information needed to establish a connection with a
-	// backend API service or to simply configure a service or CLI.
-	Settings struct {
+	// DialSettings holds information needed to establish a connection with a
+	// backend API service or to simply configure a service/CLI.
+	DialSettings struct {
 		Endpoint string `json:"endpoint,omitempty"`
 
 		Credentials *Credentials `json:"credentials,omitempty"`
@@ -40,8 +33,8 @@ type (
 	}
 )
 
-func (ds *Settings) Clone() Settings {
-	s := Settings{
+func (ds *DialSettings) Clone() DialSettings {
+	s := DialSettings{
 		Endpoint:  ds.Endpoint,
 		UserAgent: ds.UserAgent,
 		APIKey:    ds.APIKey,
@@ -70,7 +63,7 @@ func (ds *Settings) Clone() Settings {
 }
 
 // GetScopes returns the user-provided scopes, if set, or else falls back to the default scopes.
-func (ds *Settings) GetScopes() []string {
+func (ds *DialSettings) GetScopes() []string {
 	if len(ds.Scopes) > 0 {
 		return ds.Scopes
 	}
@@ -78,13 +71,13 @@ func (ds *Settings) GetScopes() []string {
 }
 
 // HasOption returns true if ds has a custom option opt.
-func (ds *Settings) HasOption(opt string) bool {
+func (ds *DialSettings) HasOption(opt string) bool {
 	_, ok := ds.Options[opt]
 	return ok
 }
 
 // GetOption returns the custom option opt if it exists or an empty string otherwise
-func (ds *Settings) GetOption(opt string) string {
+func (ds *DialSettings) GetOption(opt string) string {
 	if o, ok := ds.Options[opt]; ok {
 		return o
 	}
@@ -92,7 +85,7 @@ func (ds *Settings) GetOption(opt string) string {
 }
 
 // SetOptions registers a custom option o with key opt.
-func (ds *Settings) SetOption(opt, o string) {
+func (ds *DialSettings) SetOption(opt, o string) {
 	if ds.Options == nil {
 		ds.Options = make(map[string]string)
 	}

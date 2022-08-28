@@ -18,7 +18,7 @@ func WithGlobalFlags() []cli.Flag {
 		&cli.StringFlag{
 			Name:        "config",
 			Usage:       "configuration and secrets directory",
-			DefaultText: config.DefaultConfigLocation(),
+			DefaultText: config.GetConfig().GetConfigLocation(),
 			Aliases:     []string{"c"},
 		},
 	}

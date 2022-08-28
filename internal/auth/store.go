@@ -5,17 +5,18 @@ import (
 	"path/filepath"
 	"sync"
 
+	"github.com/txsvc/stdlib/v2"
+
 	"github.com/txsvc/apikit/helpers"
 	"github.com/txsvc/apikit/internal/settings"
-	"github.com/txsvc/stdlib/v2"
 )
 
 type (
 	authCache struct {
 		root string // location on disc
 		// different types of lookup tables
-		tokenToAuth map[string]*settings.Settings
-		idToAuth    map[string]*settings.Settings
+		tokenToAuth map[string]*settings.DialSettings
+		idToAuth    map[string]*settings.DialSettings
 	}
 )
 
@@ -32,14 +33,14 @@ func FlushAuthorizations(root string) {
 
 	cache = &authCache{
 		root:        root,
-		tokenToAuth: make(map[string]*settings.Settings),
-		idToAuth:    make(map[string]*settings.Settings),
+		tokenToAuth: make(map[string]*settings.DialSettings),
+		idToAuth:    make(map[string]*settings.DialSettings),
 	}
 
 	if root != "" {
 		filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 			if !info.IsDir() {
-				cfg, err := helpers.ReadSettingsFromFile(path)
+				cfg, err := helpers.ReadDialSettings(path)
 				if err != nil {
 					return err // FIXME: this is never checked on exit !
 				}
@@ -50,22 +51,22 @@ func FlushAuthorizations(root string) {
 	}
 }
 
-func RegisterAuthorization(cfg *settings.Settings) error {
+func RegisterAuthorization(cfg *settings.DialSettings) error {
 	return cache.Register(cfg)
 }
 
-func LookupByToken(token string) (*settings.Settings, error) {
+func LookupByToken(token string) (*settings.DialSettings, error) {
 	return cache.LookupByToken(token)
 }
 
-func UpdateStore(cfg *settings.Settings) error {
+func UpdateStore(cfg *settings.DialSettings) error {
 	if _, err := cache.LookupByToken(cfg.Credentials.Token); err != nil {
 		return err // only allow to write already registered settings
 	}
 	return cache.writeToStore(cfg)
 }
 
-func (c *authCache) Register(cfg *settings.Settings) error {
+func (c *authCache) Register(cfg *settings.DialSettings) error {
 
 	_log.Debugf("register. t=%s/%s", cfg.Credentials.Token, fileName(cfg.Credentials))
 
@@ -84,7 +85,7 @@ func (c *authCache) Register(cfg *settings.Settings) error {
 
 	// write to the file store
 	path := filepath.Join(c.root, fileName(cfg.Credentials))
-	if err := helpers.WriteSettingsToFile(cfg, path); err != nil {
+	if err := helpers.WriteDialSettings(cfg, path); err != nil {
 		return err
 	}
 
@@ -95,7 +96,7 @@ func (c *authCache) Register(cfg *settings.Settings) error {
 	return nil
 }
 
-func (c *authCache) LookupByToken(token string) (*settings.Settings, error) {
+func (c *authCache) LookupByToken(token string) (*settings.DialSettings, error) {
 	_log.Debugf("lookup. t=%s", token)
 
 	if token == "" {
@@ -107,10 +108,10 @@ func (c *authCache) LookupByToken(token string) (*settings.Settings, error) {
 	return nil, nil // FIXME: return an error ?
 }
 
-func (c *authCache) writeToStore(cfg *settings.Settings) error {
+func (c *authCache) writeToStore(cfg *settings.DialSettings) error {
 	// write to the file store
 	path := filepath.Join(c.root, fileName(cfg.Credentials))
-	if err := helpers.WriteSettingsToFile(cfg, path); err != nil {
+	if err := helpers.WriteDialSettings(cfg, path); err != nil {
 		return err
 	}
 	return nil

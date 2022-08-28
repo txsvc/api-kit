@@ -21,18 +21,18 @@ import (
 
 func init() {
 	// initialize the config provider
-	config.InitConfigProvider(config.NewLocalConfigProvider())
+	config.SetProvider(config.NewLocalConfigProvider())
 
 	// create a default configuration for the service (if none exists)
-	path := filepath.Join(config.ResolveConfigLocation(), config.DefaultConfigFileName)
+	path := filepath.Join(config.ResolveConfigLocation(), config.DefaultConfigName)
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		os.MkdirAll(filepath.Dir(path), os.ModePerm)
 
 		// create credentials and keys with defaults from this config provider
-		cfg := config.GetDefaultSettings()
+		cfg := config.GetConfig().Settings()
 
 		// save the new configuration
-		helpers.WriteSettingsToFile(cfg, path)
+		helpers.WriteDialSettings(cfg, path)
 	}
 
 	// initialize the credentials store
@@ -94,7 +94,7 @@ func pingEndpoint(c echo.Context) error {
 
 	resp := api.StatusObject{
 		Status:  http.StatusOK,
-		Message: fmt.Sprintf("version: %s", config.AppInfo().VersionString()),
+		Message: fmt.Sprintf("version: %s", config.GetConfig().Info().VersionString()),
 	}
 
 	return api.StandardResponse(c, http.StatusOK, resp)

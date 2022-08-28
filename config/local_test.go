@@ -6,49 +6,37 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGenericConfig(t *testing.T) {
-	conf := NewLocalConfigProvider().(*localConfig)
-	assert.NotNil(t, conf)
+func TestInitLocalProvider(t *testing.T) {
+	SetProvider(NewLocalConfigProvider())
 
-	assert.Equal(t, conf.DefaultConfigLocation(), DefaultConfigLocation())
-	assert.Equal(t, conf.GetConfigLocation(), GetConfigLocation())
-	assert.Equal(t, conf.GetConfigLocation(), conf.DefaultConfigLocation())
+	cfg := GetConfig()
+	assert.NotNil(t, cfg)
+
+	assert.NotNil(t, cfg.Info())
+	assert.NotNil(t, cfg.Settings())
+	assert.NotEmpty(t, cfg.GetScopes())
 }
 
-func TestSetConfigLocation(t *testing.T) {
-	conf := NewLocalConfigProvider().(*localConfig)
-	assert.NotNil(t, conf)
+func TestConfigLocation(t *testing.T) {
+	SetProvider(NewLocalConfigProvider())
 
-	InitConfigProvider(conf)
+	cfg := GetConfig()
+	assert.Equal(t, cfg, GetConfig())
 
-	assert.Equal(t, DefaultConfigDirLocation, DefaultConfigLocation())
-	assert.Equal(t, DefaultConfigDirLocation, GetConfigLocation())
-	assert.Equal(t, conf.DefaultConfigLocation(), conf.GetConfigLocation())
+	path := cfg.GetConfigLocation()
+	assert.NotEmpty(t, path)
+	assert.Equal(t, DefaultConfigLocation, path)
 
-	conf.SetConfigLocation("$HOME/.config")
-
-	assert.Equal(t, "$HOME/.config", GetConfigLocation())
-	assert.Equal(t, DefaultConfigDirLocation, DefaultConfigLocation())
-}
-
-func TestGetDefaultSettings(t *testing.T) {
-	conf := NewLocalConfigProvider().(*localConfig)
-	assert.NotNil(t, conf)
-
-	InitConfigProvider(conf)
-	ds := GetDefaultSettings()
-
-	assert.NotNil(t, ds)
-	assert.NotEmpty(t, ds)
+	cfg.SetConfigLocation("$HOME/.config")
+	assert.Equal(t, "$HOME/.config", cfg.GetConfigLocation())
 }
 
 func TestGetSettings(t *testing.T) {
 	conf := NewLocalConfigProvider().(*localConfig)
 	assert.NotNil(t, conf)
 
-	InitConfigProvider(conf)
-	ds := GetSettings()
-
+	SetProvider(conf)
+	ds := GetConfig().Settings()
 	assert.NotNil(t, ds)
 	assert.NotEmpty(t, ds)
 }

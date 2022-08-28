@@ -33,15 +33,15 @@ var (
 type (
 	Client struct {
 		httpClient *http.Client
-		cfg        *settings.Settings
+		cfg        *settings.DialSettings
 		logger     logger.Logger
 		userAgent  string
 		trace      string
 	}
 )
 
-func NewClient(cfg *settings.Settings, logger logger.Logger) (*Client, error) {
-	var _cfg *settings.Settings
+func NewClient(cfg *settings.DialSettings, logger logger.Logger) (*Client, error) {
+	var cfg_ *settings.DialSettings
 
 	httpClient, err := NewTransport(logger, http.DefaultTransport)
 	if err != nil {
@@ -51,19 +51,19 @@ func NewClient(cfg *settings.Settings, logger logger.Logger) (*Client, error) {
 	// create or clone the settings
 	if cfg != nil {
 		c := cfg.Clone()
-		_cfg = &c
+		cfg_ = &c
 	} else {
-		_cfg = config.GetSettings()
-		if _cfg.Credentials == nil {
-			_cfg.Credentials = &settings.Credentials{} // just provide something to prevent NPEs further down
+		cfg_ = config.GetConfig().Settings()
+		if cfg_.Credentials == nil {
+			cfg_.Credentials = &settings.Credentials{} // just provide something to prevent NPEs further down
 		}
 	}
 
 	return &Client{
 		httpClient: httpClient,
-		cfg:        _cfg,
+		cfg:        cfg_,
 		logger:     logger,
-		userAgent:  config.AppInfo().UserAgentString(),
+		userAgent:  config.GetConfig().Info().UserAgentString(),
 		trace:      stdlib.GetString(config.ForceTraceEnv, ""),
 	}, nil
 }

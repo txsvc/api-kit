@@ -7,19 +7,26 @@ import (
 )
 
 func TestScopes(t *testing.T) {
-	cfg1 := Settings{
-		DefaultScopes: []string{"a", "b"},
+	cfg1 := DialSettings{
+		DefaultScopes: []string{"a", "b", "c"},
 	}
 	assert.NotEmpty(t, cfg1.GetScopes())
 
-	cfg2 := Settings{
+	cfg2 := DialSettings{
 		Scopes: []string{"A", "B"},
 	}
 	assert.NotEmpty(t, cfg2.GetScopes())
+
+	cfg3 := DialSettings{
+		Scopes:        []string{"A", "B"},
+		DefaultScopes: []string{"a", "b", "c"},
+	}
+	assert.NotEmpty(t, cfg3.GetScopes())
+	assert.Equal(t, []string{"A", "B"}, cfg3.GetScopes())
 }
 
 func TestOptions(t *testing.T) {
-	cfg1 := Settings{}
+	cfg1 := DialSettings{}
 	assert.Nil(t, cfg1.Options)
 	assert.False(t, cfg1.HasOption("FOO"))
 
@@ -32,8 +39,8 @@ func TestOptions(t *testing.T) {
 	assert.Equal(t, "x", opt)
 }
 
-func TestCloneSettings(t *testing.T) {
-	s1 := Settings{
+func TestCloneDialSettings(t *testing.T) {
+	s1 := DialSettings{
 		Endpoint:  "ep",
 		UserAgent: "UserAgent",
 		APIKey:    "APIKey",

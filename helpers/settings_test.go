@@ -11,7 +11,7 @@ import (
 const testCredentialFile = "test.json"
 
 func TestWriteReadSettings(t *testing.T) {
-	settings1 := &settings.Settings{
+	settings1 := &settings.DialSettings{
 		Endpoint: "x",
 		//DefaultEndpoint: "X",
 		Scopes:        []string{"a", "b"},
@@ -22,10 +22,10 @@ func TestWriteReadSettings(t *testing.T) {
 	settings1.SetOption("FOO", "x")
 	settings1.SetOption("BAR", "x")
 
-	err := WriteSettingsToFile(settings1, testCredentialFile)
+	err := WriteDialSettings(settings1, testCredentialFile)
 	assert.NoError(t, err)
 
-	settings2, err := ReadSettingsFromFile(testCredentialFile)
+	settings2, err := ReadDialSettings(testCredentialFile)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, settings2)
 	assert.Equal(t, settings1, settings2)
@@ -42,10 +42,10 @@ func TestWriteReadCredentials(t *testing.T) {
 		Expires:   42,
 	}
 
-	err := WriteCredentialsToFile(cred1, testCredentialFile)
+	err := WriteCredentials(cred1, testCredentialFile)
 	assert.NoError(t, err)
 
-	cred2, err := ReadCredentialsFromFile(testCredentialFile)
+	cred2, err := ReadCredentials(testCredentialFile)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, cred2)
 	assert.Equal(t, cred1, cred2)

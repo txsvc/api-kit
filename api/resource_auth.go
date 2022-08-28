@@ -36,36 +36,36 @@ func WithAuthEndpoints(e *echo.Echo) *echo.Echo {
 	return e
 }
 
-func (c *Client) InitCommand(cfg *settings.Settings) error {
+func (c *Client) InitCommand(cfg *settings.DialSettings) error {
 	_, err := c.POST(fmt.Sprintf("%s%s", NamespacePrefix, InitRoute), cfg, nil)
 	return err
 }
 
 func InitEndpoint(c echo.Context) error {
 	// get the payload
-	var _cfg *settings.Settings = new(settings.Settings)
-	if err := c.Bind(_cfg); err != nil {
+	var cfg_ *settings.DialSettings = new(settings.DialSettings)
+	if err := c.Bind(cfg_); err != nil {
 		return StandardResponse(c, http.StatusBadRequest, nil)
 	}
 
 	// pre-validate the request
-	if _cfg.Credentials == nil || _cfg.APIKey == "" {
+	if cfg_.Credentials == nil || cfg_.APIKey == "" {
 		return StandardResponse(c, http.StatusBadRequest, nil)
 	}
-	if _cfg.Credentials.ProjectID == "" || _cfg.Credentials.UserID == "" {
+	if cfg_.Credentials.ProjectID == "" || cfg_.Credentials.UserID == "" {
 		return StandardResponse(c, http.StatusBadRequest, nil)
 	}
 
 	// create a brand new instance so that the client can't sneak anything in we don't want
-	cfg := settings.Settings{
-		Credentials:   _cfg.Credentials.Clone(),
-		DefaultScopes: config.GetDefaultScopes(),
+	cfg := settings.DialSettings{
+		Credentials:   cfg_.Credentials.Clone(),
+		DefaultScopes: config.GetConfig().GetScopes(),
 	}
 
 	// prepare the settings for registration
 	cfg.Credentials.Token = CreateSimpleToken() // ignore anything that was provided
 	cfg.Credentials.Expires = stdlib.IncT(stdlib.Now(), LoginExpiresAfter)
-	cfg.APIKey = _cfg.APIKey
+	cfg.APIKey = cfg_.APIKey
 	cfg.Status = settings.StateInit // signals init
 
 	if err := auth.RegisterAuthorization(&cfg); err != nil {
@@ -103,26 +103,26 @@ func LoginEndpoint(c echo.Context) error {
 	}
 
 	// verify the request
-	_cfg, err := auth.LookupByToken(token)
-	if _cfg == nil && err != nil {
+	cfg_, err := auth.LookupByToken(token)
+	if cfg_ == nil && err != nil {
 		return ErrorResponse(c, http.StatusBadRequest, ErrInternalError, "token")
 	}
-	if _cfg == nil && err == nil {
+	if cfg_ == nil && err == nil {
 		return ErrorResponse(c, http.StatusBadRequest, config.ErrInitializingConfiguration, "not found") // simply not there ...
 	}
 
 	// compare provided signature with the expected signature
-	if sig != signature(_cfg.APIKey, _cfg.Credentials.Token) {
+	if sig != signature(cfg_.APIKey, cfg_.Credentials.Token) {
 		return ErrorResponse(c, http.StatusBadRequest, config.ErrInitializingConfiguration, "invalid sig")
 	}
 
 	// check if the token is still valid
-	if _cfg.Credentials.Expires < stdlib.Now() {
+	if cfg_.Credentials.Expires < stdlib.Now() {
 		return ErrorResponse(c, http.StatusBadRequest, auth.ErrTokenExpired, "expired")
 	}
 
 	// everything checks out, create/register the real credentials now ...
-	cfg := _cfg.Clone()         // clone, otherwise stupid things happen with pointers !
+	cfg := cfg_.Clone()         // clone, otherwise stupid things happen with pointers !
 	cfg.Credentials.Expires = 0 // FIXME: really never ?
 	cfg.Credentials.Token = CreateSimpleToken()
 	cfg.Status = settings.StateAuthorized

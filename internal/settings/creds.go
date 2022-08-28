@@ -34,13 +34,16 @@ func (c *Credentials) Key() string {
 
 // IsValid test if Crendentials is valid
 func (c *Credentials) IsValid() bool {
-	// attributes must be set
-	if len(c.Token) == 0 || len(c.ProjectID) == 0 || len(c.UserID) == 0 {
+	if c.Expires < 0 || len(c.Token) == 0 || len(c.ProjectID) == 0 || len(c.UserID) == 0 {
 		return false
 	}
+	return !c.Expired()
+}
 
+// Expired only verifies just that, does not check all other attributes
+func (c *Credentials) Expired() bool {
 	if c.Expires == 0 {
-		return true
+		return false
 	}
-	return c.Expires > stdlib.Now()
+	return c.Expires < stdlib.Now()
 }

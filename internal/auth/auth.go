@@ -54,7 +54,7 @@ func init() {
 // CheckAuthorization relies on the presence of a bearer token and validates the
 // matching authorization against a list of requested scopes. If everything checks out,
 // the function returns the authorization or an error otherwise.
-func CheckAuthorization(ctx context.Context, c echo.Context, scope string) (*settings.Settings, error) {
+func CheckAuthorization(ctx context.Context, c echo.Context, scope string) (*settings.DialSettings, error) {
 	token, err := GetBearerToken(c.Request())
 	if err != nil {
 		return nil, err
