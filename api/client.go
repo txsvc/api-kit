@@ -44,10 +44,7 @@ type (
 func NewClient(cfg *settings.DialSettings, logger logger.Logger) (*Client, error) {
 	var cfg_ *settings.DialSettings
 
-	httpClient, err := NewTransport(logger, http.DefaultTransport)
-	if err != nil {
-		return nil, err
-	}
+	httpClient := NewTransport(logger, http.DefaultTransport)
 
 	// create or clone the settings
 	if cfg != nil {
@@ -66,7 +63,7 @@ func NewClient(cfg *settings.DialSettings, logger logger.Logger) (*Client, error
 		logger:     logger,
 		userAgent:  config.GetConfig().Info().UserAgentString(),
 		trace:      stdlib.GetString(config.ForceTraceEnv, ""),
-	}, nil
+	}, nil // FIXME: nothing creates an error here, remove later?
 }
 
 // GET is used to request data from the API. No payload, only queries!
