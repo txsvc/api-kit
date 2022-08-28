@@ -31,7 +31,7 @@ func timeoutShutdown(ctx context.Context, a *App) error {
 		fmt.Println("blocking ...")
 	}
 
-	return nil
+	//return nil
 }
 
 func TestNewSimple(t *testing.T) {

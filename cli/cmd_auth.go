@@ -8,7 +8,6 @@ import (
 
 	"github.com/txsvc/stdlib/v2"
 
-	"github.com/txsvc/apikit"
 	"github.com/txsvc/apikit/api"
 	"github.com/txsvc/apikit/config"
 	"github.com/txsvc/apikit/helpers"
@@ -52,7 +51,7 @@ func WithAuthCommands() []*cli.Command {
 
 func InitCommand(c *cli.Context) error {
 	if c.NArg() < 1 || c.NArg() > 2 {
-		return apikit.ErrInvalidNumArguments
+		return ErrInvalidNumArguments
 	}
 
 	userid := ""
@@ -140,7 +139,7 @@ func InitCommand(c *cli.Context) error {
 
 func LoginCommand(c *cli.Context) error {
 	if c.NArg() < 1 || c.NArg() > 1 {
-		return apikit.ErrInvalidNumArguments
+		return ErrInvalidNumArguments
 	}
 
 	token := c.Args().First()
@@ -180,7 +179,7 @@ func LoginCommand(c *cli.Context) error {
 
 func LogoutCommand(c *cli.Context) error {
 	if c.NArg() > 0 {
-		return apikit.ErrInvalidNumArguments
+		return ErrInvalidNumArguments
 	}
 
 	// load settings

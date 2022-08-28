@@ -7,8 +7,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/txsvc/apikit"
-
 	"github.com/txsvc/stdlib/v2"
 
 	"github.com/txsvc/apikit/config"
@@ -27,6 +25,9 @@ const (
 var (
 	// ErrMissingCredentials indicates that a credentials are is missing
 	ErrMissingCredentials = errors.New("missing credentials")
+
+	// ErrApiInvocationError indicates an error in an API call
+	ErrApiInvocationError = errors.New("api invocation error")
 )
 
 // Client - API client encapsulating the http client
@@ -142,7 +143,7 @@ func (c *Client) roundTrip(req *http.Request, response interface{}) (int, error)
 			}
 			return status.Status, fmt.Errorf(status.Message)
 		}
-		return resp.StatusCode, apikit.ErrApiError
+		return resp.StatusCode, ErrApiInvocationError
 	}
 
 	// unmarshal the response if one is expected
