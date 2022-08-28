@@ -48,7 +48,10 @@ func NewStatus(s int, m string) StatusObject {
 
 // NewErrorStatus initializes a new StatusObject from an error
 func NewErrorStatus(s int, e error, hint string) StatusObject {
-	return StatusObject{Status: s, Message: fmt.Sprintf("%s (%s)", e.Error(), hint), RootError: e}
+	if hint != "" {
+		return StatusObject{Status: s, Message: fmt.Sprintf("%s (%s)", e.Error(), hint), RootError: e}
+	}
+	return StatusObject{Status: s, Message: e.Error(), RootError: e}
 }
 
 func (so *StatusObject) String() string {
@@ -80,9 +83,6 @@ func StandardResponse(c echo.Context, status int, res interface{}) error {
 // ErrorResponse reports the error and responds with an ErrorObject
 func ErrorResponse(c echo.Context, status int, err error, hint string) error {
 	var resp StatusObject
-
-	// send the error to the Error Reporting
-	// FIXME observer.ReportError(err)
 
 	if err == nil {
 		resp = NewStatus(http.StatusInternalServerError, fmt.Sprintf("%d", status))

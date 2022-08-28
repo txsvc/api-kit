@@ -22,6 +22,9 @@ const (
 
 type (
 	localConfig struct {
+		// the interface to implement
+		Configurator
+
 		// app info
 		info *Info
 		// path to configuration settings
@@ -32,12 +35,7 @@ type (
 	}
 )
 
-var (
-	// interface guard to ensure that all required functions are implemented
-	_ Configurator = (*localConfig)(nil)
-)
-
-func NewLocalConfigProvider() interface{} {
+func NewLocalConfigProvider() Configurator {
 
 	// get the current working dir. abort on error
 	dir, err := os.Getwd()
@@ -73,10 +71,10 @@ func (c *localConfig) GetScopes() []string {
 	return defaultScopes()
 }
 
-// GetConfigLocation returns the config location that was set using SetConfigLocation().
+// ConfigLocation returns the config location that was set using SetConfigLocation().
 // If no location is defined, GetConfigLocation looks for ENV['CONFIG_LOCATION'] or
 // returns DefaultConfigLocation() if no environment variable was set.
-func (c *localConfig) GetConfigLocation() string {
+func (c *localConfig) ConfigLocation() string {
 	if len(c.confDir) == 0 {
 		return stdlib.GetString(ConfigDirLocationENV, DefaultConfigLocation)
 	}
@@ -96,7 +94,7 @@ func (c *localConfig) Settings() *settings.DialSettings {
 	}
 
 	// try to load the dial settings
-	pathToFile := filepath.Join(ResolveConfigLocation(), DefaultConfigName)
+	pathToFile := filepath.Join(c.ConfigLocation(), DefaultConfigName)
 	cfg, err := helpers.ReadDialSettings(pathToFile)
 	if err != nil {
 		cfg = c.defaultSettings()

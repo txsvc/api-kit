@@ -123,7 +123,7 @@ func InitCommand(c *cli.Context) error {
 	}
 
 	// finally save the file
-	pathToFile := filepath.Join(config.ResolveConfigLocation(), config.DefaultConfigName)
+	pathToFile := filepath.Join(config.GetConfig().ConfigLocation(), config.DefaultConfigName)
 	if err := helpers.WriteDialSettings(cfg, pathToFile); err != nil {
 		return config.ErrInitializingConfiguration
 	}
@@ -167,7 +167,7 @@ func LoginCommand(c *cli.Context) error {
 		return config.ErrInvalidConfiguration
 	}
 
-	pathToFile := filepath.Join(config.ResolveConfigLocation(), config.DefaultConfigName)
+	pathToFile := filepath.Join(config.GetConfig().ConfigLocation(), config.DefaultConfigName)
 	if err := helpers.WriteDialSettings(cfg, pathToFile); err != nil {
 		return config.ErrInitializingConfiguration
 	}
@@ -202,7 +202,7 @@ func LogoutCommand(c *cli.Context) error {
 	cfg.Credentials.Expires = stdlib.Now() - 1
 	cfg.Status = settings.StateUndefined // LOGGED_OUT
 
-	pathToFile := filepath.Join(config.ResolveConfigLocation(), config.DefaultConfigName)
+	pathToFile := filepath.Join(config.GetConfig().ConfigLocation(), config.DefaultConfigName)
 	if err := helpers.WriteDialSettings(cfg, pathToFile); err != nil {
 		return config.ErrInitializingConfiguration
 	}

@@ -5,8 +5,6 @@ import (
 	"fmt"
 
 	"github.com/urfave/cli/v2"
-
-	"github.com/txsvc/apikit/config"
 )
 
 var (
@@ -22,10 +20,9 @@ func NoOpCommand(c *cli.Context) error {
 func WithGlobalFlags() []cli.Flag {
 	flags := []cli.Flag{
 		&cli.StringFlag{
-			Name:        "config",
-			Usage:       "configuration and secrets directory",
-			DefaultText: config.GetConfig().GetConfigLocation(),
-			Aliases:     []string{"c"},
+			Name:    "config",
+			Usage:   "configuration and secrets directory",
+			Aliases: []string{"c"},
 		},
 	}
 	return flags

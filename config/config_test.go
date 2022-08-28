@@ -21,19 +21,3 @@ func TestSetConfig(t *testing.T) {
 	SetProvider(conf)
 	assert.Equal(t, conf, GetConfig())
 }
-
-func TestResolveConfigLocation(t *testing.T) {
-	SetProvider(NewLocalConfigProvider())
-
-	cfg := GetConfig()
-	assert.Equal(t, cfg, GetConfig())
-
-	path := ResolveConfigLocation()
-	assert.NotEmpty(t, path)
-	assert.NotEqual(t, DefaultConfigLocation, path)
-
-	cfg.SetConfigLocation("$HOME/.config")
-	path = ResolveConfigLocation()
-	assert.NotEmpty(t, path)
-	assert.Equal(t, "$HOME/.config", path)
-}

@@ -10,11 +10,6 @@ import (
 
 // FIXME: make this Google AppEngine specific !
 
-var (
-	// interface guard to ensure that all required functions are implemented
-	_ config.Configurator = (*appConfig)(nil)
-)
-
 func (c *appConfig) Info() *config.Info {
 	return c.info
 }
@@ -26,21 +21,15 @@ func (c *appConfig) GetScopes() []string {
 	return defaultScopes()
 }
 
-// GetConfigLocation returns the config location that was set using SetConfigLocation().
+// ConfigLocation returns the config location that was set using SetConfigLocation().
 // If no location is defined, GetConfigLocation looks for ENV['CONFIG_LOCATION'] or
 // returns DefaultConfigLocation() if no environment variable was set.
-func (c *appConfig) GetConfigLocation() string {
-	if len(c.root) == 0 {
-		return stdlib.GetString(config.ConfigDirLocationENV, config.DefaultConfigLocation)
-	}
-	return c.root
+func (c *appConfig) ConfigLocation() string {
+	return "" // nothing since we don't access any local resources
 }
 
 func (c *appConfig) SetConfigLocation(loc string) {
-	c.root = loc
-	if c.cfg_ != nil {
-		c.cfg_ = nil // force a reload the next time GetSettings() is called ...
-	}
+	// do nothing since we don't access any local resources
 }
 
 func (c *appConfig) Settings() *settings.DialSettings {

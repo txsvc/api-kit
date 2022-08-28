@@ -23,12 +23,12 @@ func TestConfigLocation(t *testing.T) {
 	cfg := GetConfig()
 	assert.Equal(t, cfg, GetConfig())
 
-	path := cfg.GetConfigLocation()
+	path := cfg.ConfigLocation()
 	assert.NotEmpty(t, path)
 	assert.Equal(t, DefaultConfigLocation, path)
 
 	cfg.SetConfigLocation("$HOME/.config")
-	assert.Equal(t, "$HOME/.config", cfg.GetConfigLocation())
+	assert.Equal(t, "$HOME/.config", cfg.ConfigLocation())
 }
 
 func TestGetSettings(t *testing.T) {

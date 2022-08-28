@@ -3,9 +3,6 @@ package config
 import (
 	"errors"
 	"log"
-	"os"
-	"path/filepath"
-	"strings"
 
 	"github.com/txsvc/apikit/internal/settings"
 )
@@ -48,8 +45,8 @@ type (
 		Info() *Info
 		// GetScopes returns the user-provided scopes, if set, or else falls back to the default scopes.
 		GetScopes() []string
-		// GetConfigLocation returns the path to the config location, if set, or the default location otherwise.
-		GetConfigLocation() string // './.config' unless explicitly set.
+		// ConfigLocation returns the path to the config location, if set, or the default location otherwise.
+		ConfigLocation() string // './.config' unless explicitly set.
 		// SetConfigLocation explicitly sets the location where the configuration is expected. The location's existence is NOT verified.
 		SetConfigLocation(string)
 		// Settings returns the app settings, if configured, or falls back to a default, minimal configuration
@@ -66,7 +63,7 @@ var (
 	ErrInvalidConfiguration = errors.New("invalid configuration")
 
 	// the config "singleton"
-	config_ interface{}
+	config_ Configurator
 )
 
 func init() {
@@ -74,12 +71,12 @@ func init() {
 	SetProvider(NewLocalConfigProvider())
 }
 
-func SetProvider(provider interface{}) {
+func SetProvider(provider Configurator) {
 	config_ = provider
 }
 
 func GetConfig() Configurator {
-	return config_.(Configurator)
+	return config_
 }
 
 // SetConfigLocation sets the actual location without checking if the location actually exists !
@@ -87,19 +84,5 @@ func SetConfigLocation(loc string) {
 	if config_ == nil {
 		log.Fatal(ErrMissingConfigurator)
 	}
-	config_.(Configurator).SetConfigLocation(loc)
-}
-
-// ResolveConfigLocation returns the full path to the config location
-func ResolveConfigLocation() string {
-	cl := GetConfig().GetConfigLocation()
-	if strings.HasPrefix(cl, ".") {
-		// relative to working dir
-		wd, err := os.Getwd()
-		if err != nil {
-			return GetConfig().GetConfigLocation()
-		}
-		return filepath.Join(wd, cl)
-	}
-	return cl
+	config_.SetConfigLocation(loc)
 }

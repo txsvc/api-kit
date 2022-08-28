@@ -24,7 +24,7 @@ func init() {
 	config.SetProvider(config.NewLocalConfigProvider())
 
 	// create a default configuration for the service (if none exists)
-	path := filepath.Join(config.ResolveConfigLocation(), config.DefaultConfigName)
+	path := filepath.Join(config.GetConfig().ConfigLocation(), config.DefaultConfigName)
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		os.MkdirAll(filepath.Dir(path), os.ModePerm)
 
@@ -36,7 +36,7 @@ func init() {
 	}
 
 	// initialize the credentials store
-	root := filepath.Join(config.ResolveConfigLocation(), "cred")
+	root := filepath.Join(config.GetConfig().ConfigLocation(), "cred")
 	auth.FlushAuthorizations(root)
 }
 

@@ -32,9 +32,11 @@ const (
 
 type (
 	appConfig struct {
-		root string // the fully qualified path to the conf dir
+		// the interface to implement
+		config.Configurator
+
+		// some implementation specifc data
 		info *config.Info
-		// cached settings
 		cfg_ *settings.DialSettings
 	}
 )
@@ -44,7 +46,7 @@ func init() {
 	config.SetProvider(NewAppEngineConfigProvider())
 
 	// create a default configuration for the service (if none exists)
-	path := filepath.Join(config.ResolveConfigLocation(), config.DefaultConfigName)
+	path := filepath.Join(config.GetConfig().ConfigLocation(), config.DefaultConfigName)
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		os.MkdirAll(filepath.Dir(path), os.ModePerm)
 
@@ -56,8 +58,7 @@ func init() {
 	}
 
 	// initialize the credentials store
-	root := filepath.Join(config.ResolveConfigLocation(), "cred")
-	auth.FlushAuthorizations(root)
+	auth.FlushAuthorizations("")
 }
 
 func main() {
@@ -110,7 +111,7 @@ func pingEndpoint(c echo.Context) error {
 	return api.StandardResponse(c, http.StatusOK, resp)
 }
 
-func NewAppEngineConfigProvider() interface{} {
+func NewAppEngineConfigProvider() config.Configurator {
 	info := config.NewAppInfo(
 		"appengine kit",
 		"aek",
