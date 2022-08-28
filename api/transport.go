@@ -13,7 +13,7 @@ import (
 )
 
 type (
-	LoggingTransport struct {
+	loggingTransport struct {
 		InnerTransport http.RoundTripper
 		Logger         logger.Logger
 	}
@@ -25,7 +25,7 @@ type (
 
 var contextKeyRequestStart = &contextKey{"RequestStart"}
 
-func NewTransport(logger logger.Logger, transport http.RoundTripper) (*http.Client, error) {
+func NewTransport(logger logger.Logger, transport http.RoundTripper) *http.Client {
 	retryTransport := rehttp.NewTransport(
 		transport,
 		rehttp.RetryAll(
@@ -38,19 +38,15 @@ func NewTransport(logger logger.Logger, transport http.RoundTripper) (*http.Clie
 		rehttp.ExpJitterDelay(100*time.Millisecond, 1*time.Second),
 	)
 
-	loggingTransport := &LoggingTransport{
-		InnerTransport: retryTransport,
-		Logger:         logger,
+	return &http.Client{
+		Transport: &loggingTransport{
+			InnerTransport: retryTransport,
+			Logger:         logger,
+		},
 	}
-
-	httpClient := &http.Client{
-		Transport: loggingTransport,
-	}
-
-	return httpClient, nil
 }
 
-func (t *LoggingTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+func (t *loggingTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	ctx := context.WithValue(req.Context(), contextKeyRequestStart, time.Now())
 	req = req.WithContext(ctx)
 
@@ -66,7 +62,7 @@ func (t *LoggingTransport) RoundTrip(req *http.Request) (*http.Response, error) 
 	return resp, err
 }
 
-func (t *LoggingTransport) logRequest(req *http.Request) {
+func (t *loggingTransport) logRequest(req *http.Request) {
 
 	t.Logger.Debugf("--> %s %s\n", req.Method, req.URL)
 
@@ -91,7 +87,7 @@ func (t *LoggingTransport) logRequest(req *http.Request) {
 	req.Body = io.NopCloser(bytes.NewReader(data))
 }
 
-func (t *LoggingTransport) logResponse(resp *http.Response) {
+func (t *loggingTransport) logResponse(resp *http.Response) {
 	ctx := resp.Request.Context()
 	defer resp.Body.Close()
 

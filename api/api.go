@@ -1,13 +1,9 @@
 package api
 
 import (
-	"context"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
-	"os"
-	"path/filepath"
 
 	"github.com/labstack/echo/v4"
 )
@@ -63,6 +59,11 @@ func (so *StatusObject) Error() string {
 	return so.String()
 }
 
+// DefaultEndpoint just returns http.StatusOK
+func DefaultEndpoint(c echo.Context) error {
+	return StandardResponse(c, http.StatusOK, nil)
+}
+
 // StandardResponse is the default way to respond to API requests
 func StandardResponse(c echo.Context, status int, res interface{}) error {
 	if res == nil {
@@ -89,48 +90,4 @@ func ErrorResponse(c echo.Context, status int, err error, hint string) error {
 		resp = NewErrorStatus(status, err, hint)
 	}
 	return c.JSON(status, &resp)
-}
-
-// DefaultEndpoint just returns http.StatusOK
-func DefaultEndpoint(c echo.Context) error {
-	return StandardResponse(c, http.StatusOK, nil)
-}
-
-// HandleFileUpload receives files from stores them locally
-func HandleFileUpload(ctx context.Context, req *http.Request, location, formName string) (string, error) {
-	var path string
-
-	// FIXME: treat location as a 'bucket' in preparation of switching to a generic storage API
-
-	mr, err := req.MultipartReader()
-	if err != nil {
-		return "", err
-	}
-
-	for {
-		part, err := mr.NextPart()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return "", err
-		}
-
-		if part.FormName() == formName {
-			path = filepath.Join(location, part.FileName())
-
-			os.MkdirAll(filepath.Dir(path), os.ModePerm) // make sure sub-folders exist
-			out, err := os.Create(path)
-			if err != nil {
-				return "", err
-			}
-			defer out.Close()
-
-			if _, err := io.Copy(out, part); err != nil {
-				return "", err
-			}
-		}
-	}
-
-	return path, nil // FIXME: do we need the path ?
 }
