@@ -1,11 +1,17 @@
 package cli
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/urfave/cli/v2"
 
 	"github.com/txsvc/apikit/config"
+)
+
+var (
+	// ErrInvalidNumArguments indicates that the number of arguments in a command is not valid
+	ErrInvalidNumArguments = errors.New("invalid number of arguments")
 )
 
 // NoOpCommand is just a placeholder
@@ -18,7 +24,7 @@ func WithGlobalFlags() []cli.Flag {
 		&cli.StringFlag{
 			Name:        "config",
 			Usage:       "configuration and secrets directory",
-			DefaultText: config.DefaultConfigLocation(),
+			DefaultText: config.GetConfig().GetConfigLocation(),
 			Aliases:     []string{"c"},
 		},
 	}

@@ -7,16 +7,28 @@ import (
 
 	"github.com/txsvc/stdlib/v2"
 
-	"github.com/txsvc/apikit/internal"
+	"github.com/txsvc/apikit/helpers"
 	"github.com/txsvc/apikit/internal/auth"
 	"github.com/txsvc/apikit/internal/settings"
 )
 
+// the below version numbers should match the git release tags,
+// i.e. there should be a version 'v0.1.0' on branch main !
+const (
+	majorVersion = 0
+	minorVersion = 1
+	fixVersion   = 0
+)
+
 type (
 	localConfig struct {
-		rootDir  string // the current working dir
-		confDir  string // the fully qualified path to the conf dir
-		settings *settings.Settings
+		// app info
+		info *Info
+		// path to configuration settings
+		rootDir string // the current working dir
+		confDir string // the fully qualified path to the conf dir
+		// cached settings
+		cfg_ *settings.DialSettings
 	}
 )
 
@@ -36,41 +48,29 @@ func NewLocalConfigProvider() interface{} {
 	c := &localConfig{
 		rootDir: dir,
 		confDir: "",
+		info: &Info{
+			name:         "appkit",
+			shortName:    "appkit",
+			copyright:    "Copyright 2022, transformative.services, https://txs.vc",
+			about:        "about appkit",
+			majorVersion: majorVersion,
+			minorVersion: minorVersion,
+			fixVersion:   fixVersion,
+		},
 	}
 
 	return c
 }
 
-func (c *localConfig) Name() string {
-	return "simplecli"
+func (c *localConfig) Info() *Info {
+	return c.info
 }
 
-func (c *localConfig) ShortName() string {
-	return "sc"
-}
-
-func (c *localConfig) Copyright() string {
-	return "Copyright 2022, transformative.services, https://txs.vc"
-}
-
-func (c *localConfig) About() string {
-	return "a simple cli (sc) example"
-}
-
-func (c *localConfig) MajorVersion() int {
-	return majorVersion
-}
-
-func (c *localConfig) MinorVersion() int {
-	return minorVersion
-}
-
-func (c *localConfig) FixVersion() int {
-	return fixVersion
-}
-
-func (c *localConfig) DefaultConfigLocation() string {
-	return DefaultConfigDirLocation
+func (c *localConfig) GetScopes() []string {
+	if c.cfg_ != nil {
+		return c.cfg_.GetScopes()
+	}
+	return defaultScopes()
 }
 
 // GetConfigLocation returns the config location that was set using SetConfigLocation().
@@ -78,45 +78,53 @@ func (c *localConfig) DefaultConfigLocation() string {
 // returns DefaultConfigLocation() if no environment variable was set.
 func (c *localConfig) GetConfigLocation() string {
 	if len(c.confDir) == 0 {
-		return stdlib.GetString(ConfigDirLocationENV, c.DefaultConfigLocation())
+		return stdlib.GetString(ConfigDirLocationENV, DefaultConfigLocation)
 	}
 	return c.confDir
 }
 
 func (c *localConfig) SetConfigLocation(loc string) {
 	c.confDir = loc
-}
-
-func (c *localConfig) GetDefaultSettings() *settings.Settings {
-	return &settings.Settings{
-		Endpoint: "http://localhost:8080",
-		DefaultScopes: []string{
-			auth.ScopeApiRead,
-			auth.ScopeApiWrite,
-		},
-		Credentials: &settings.Credentials{}, // add this to avoid NPEs further down
+	if c.cfg_ != nil {
+		c.cfg_ = nil // force a reload the next time GetSettings() is called ...
 	}
 }
 
-func (c *localConfig) GetSettings() *settings.Settings {
-	if c.settings != nil {
-		return c.settings
+func (c *localConfig) Settings() *settings.DialSettings {
+	if c.cfg_ != nil {
+		return c.cfg_
 	}
 
 	// try to load the dial settings
-	pathToFile := filepath.Join(ResolveConfigLocation(), DefaultConfigFileName)
-	cs, err := internal.ReadSettingsFromFile(pathToFile) // FIXME: internal. will become an issue later
+	pathToFile := filepath.Join(ResolveConfigLocation(), DefaultConfigName)
+	cfg, err := helpers.ReadDialSettings(pathToFile)
 	if err != nil {
-		cs = GetDefaultSettings()
+		cfg = c.defaultSettings()
 		// save to the default location
-		if err = cs.WriteToFile(pathToFile); err != nil {
+		if err = helpers.WriteDialSettings(cfg, pathToFile); err != nil {
 			log.Fatal(err)
 		}
 	}
 
-	// patch values from ENV if available
+	// patch values from ENV, if available
+	cfg.Endpoint = stdlib.GetString(APIEndpointENV, cfg.Endpoint)
 
-	// make it available for further call
-	c.settings = cs
-	return cs
+	// make it available for future calls
+	c.cfg_ = cfg
+	return c.cfg_
+}
+
+func (c *localConfig) defaultSettings() *settings.DialSettings {
+	return &settings.DialSettings{
+		Endpoint:      DefaultEndpoint,
+		DefaultScopes: defaultScopes(),
+		Credentials:   &settings.Credentials{}, // add this to avoid NPEs further down
+	}
+}
+
+func defaultScopes() []string {
+	// FIXME: this gives basic read access to the API. Is this what we want?
+	return []string{
+		auth.ScopeApiRead,
+	}
 }

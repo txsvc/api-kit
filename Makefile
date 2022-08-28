@@ -8,7 +8,6 @@ all: test
 
 .PHONY: test
 test:
-	cd internal && go test -covermode=atomic
 	cd internal/auth && go test -covermode=atomic
 	cd internal/settings && go test -covermode=atomic
 	cd logger && go test -covermode=atomic
@@ -21,13 +20,13 @@ test:
 .PHONY: test_build
 test_build:
 	go mod verify && go mod tidy
-	cd examples/auth/api && go build main.go && rm main
-	cd examples/auth/cli && go build cli.go && rm cli
+	cd examples/service && go build main.go && rm main
+	cd examples/cli && go build cli.go && rm cli
 	cd examples/appengine && go build main.go && rm main
 
 
 .PHONY: examples
-examples: example_cli example_api
+examples: example_cli example_service
 
 .PHONY: example_appengine
 example_appengine:
@@ -35,12 +34,12 @@ example_appengine:
 
 .PHONY: example_cli
 example_cli:
-	cd examples/auth/cli && go build -o ${EXAMPLE_NAME} cli.go && mv ${EXAMPLE_NAME} ../../../bin/${EXAMPLE_NAME}
+	cd examples/cli && go build -o ${EXAMPLE_NAME} cli.go && mv ${EXAMPLE_NAME} ../../bin/${EXAMPLE_NAME}
 	chmod +x bin/${EXAMPLE_NAME}
 
-.PHONY: example_api
-example_api:
-	cd examples/auth/cli && go build -o svc cli.go && mv svc ../../../bin/${EXAMPLE_NAME}svc
+.PHONY: example_service
+example_service:
+	cd examples/service && go build -o svc main.go && mv svc ../../bin/${EXAMPLE_NAME}svc
 	chmod +x bin/${EXAMPLE_NAME}svc
 
 #.PHONY example_api_container

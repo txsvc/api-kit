@@ -7,8 +7,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/txsvc/apikit"
-
 	"github.com/txsvc/stdlib/v2"
 
 	"github.com/txsvc/apikit/config"
@@ -27,21 +25,24 @@ const (
 var (
 	// ErrMissingCredentials indicates that a credentials are is missing
 	ErrMissingCredentials = errors.New("missing credentials")
+
+	// ErrApiInvocationError indicates an error in an API call
+	ErrApiInvocationError = errors.New("api invocation error")
 )
 
 // Client - API client encapsulating the http client
 type (
 	Client struct {
 		httpClient *http.Client
-		cfg        *settings.Settings
+		cfg        *settings.DialSettings
 		logger     logger.Logger
 		userAgent  string
 		trace      string
 	}
 )
 
-func NewClient(cfg *settings.Settings, logger logger.Logger) (*Client, error) {
-	var _cfg *settings.Settings
+func NewClient(cfg *settings.DialSettings, logger logger.Logger) (*Client, error) {
+	var cfg_ *settings.DialSettings
 
 	httpClient, err := NewTransport(logger, http.DefaultTransport)
 	if err != nil {
@@ -51,20 +52,20 @@ func NewClient(cfg *settings.Settings, logger logger.Logger) (*Client, error) {
 	// create or clone the settings
 	if cfg != nil {
 		c := cfg.Clone()
-		_cfg = &c
+		cfg_ = &c
 	} else {
-		_cfg = config.GetSettings()
-		if _cfg.Credentials == nil {
-			_cfg.Credentials = &settings.Credentials{} // just provide something to prevent NPEs further down
+		cfg_ = config.GetConfig().Settings()
+		if cfg_.Credentials == nil {
+			cfg_.Credentials = &settings.Credentials{} // just provide something to prevent NPEs further down
 		}
 	}
 
 	return &Client{
 		httpClient: httpClient,
-		cfg:        _cfg,
+		cfg:        cfg_,
 		logger:     logger,
-		userAgent:  config.UserAgentString(),
-		trace:      stdlib.GetString("APIKIT_FORCE_TRACE", ""),
+		userAgent:  config.GetConfig().Info().UserAgentString(),
+		trace:      stdlib.GetString(config.ForceTraceEnv, ""),
 	}, nil
 }
 
@@ -142,7 +143,7 @@ func (c *Client) roundTrip(req *http.Request, response interface{}) (int, error)
 			}
 			return status.Status, fmt.Errorf(status.Message)
 		}
-		return resp.StatusCode, apikit.ErrApiError
+		return resp.StatusCode, ErrApiInvocationError
 	}
 
 	// unmarshal the response if one is expected

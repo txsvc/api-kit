@@ -14,37 +14,45 @@ import (
 	"github.com/txsvc/apikit"
 	"github.com/txsvc/apikit/api"
 	"github.com/txsvc/apikit/config"
-	"github.com/txsvc/apikit/internal"
+	"github.com/txsvc/apikit/helpers"
 	"github.com/txsvc/apikit/internal/auth"
+	"github.com/txsvc/apikit/internal/settings"
 )
 
-// FIXME: implement in memory certstore
+// the below version numbers should match the git release tags,
+// i.e. there should be e.g. a version 'v0.1.0' on branch main !
+const (
+	// MajorVersion of the API
+	majorVersion = 0
+	// MinorVersion of the API
+	minorVersion = 1
+	// FixVersion of the API
+	fixVersion = 0
+)
+
+type (
+	appConfig struct {
+		root string // the fully qualified path to the conf dir
+		info *config.Info
+		// cached settings
+		cfg_ *settings.DialSettings
+	}
+)
 
 func init() {
 	// initialize the config provider
-	config.InitConfigProvider(config.NewSimpleConfigProvider())
+	config.SetProvider(NewAppEngineConfigProvider())
 
 	// create a default configuration for the service (if none exists)
-	path := filepath.Join(config.ResolveConfigLocation(), config.DefaultConfigFileName)
+	path := filepath.Join(config.ResolveConfigLocation(), config.DefaultConfigName)
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		os.MkdirAll(filepath.Dir(path), os.ModePerm)
 
-		// create credentials and keys
-		cfg, err := internal.InitSettings(config.Name(), config.Name())
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		// defaults from this config provider
-		def := config.GetDefaultSettings()
-
-		// copy the credentials and api keys
-		def.Credentials = cfg.Credentials
-		def.APIKey = cfg.APIKey
-		def.Scopes = append(def.Scopes, auth.ScopeApiAdmin)
+		// create credentials and keys with defaults from this config provider
+		cfg := config.GetConfig().Settings()
 
 		// save the new configuration
-		def.WriteToFile(path)
+		helpers.WriteDialSettings(cfg, path)
 	}
 
 	// initialize the credentials store
@@ -96,8 +104,24 @@ func pingEndpoint(c echo.Context) error {
 
 	resp := api.StatusObject{
 		Status:  http.StatusOK,
-		Message: fmt.Sprintf("version: %s", config.VersionString()),
+		Message: fmt.Sprintf("version: %s", config.GetConfig().Info().VersionString()),
 	}
 
 	return api.StandardResponse(c, http.StatusOK, resp)
+}
+
+func NewAppEngineConfigProvider() interface{} {
+	info := config.NewAppInfo(
+		"appengine kit",
+		"aek",
+		"Copyright 2022, transformative.services, https://txs.vc",
+		"about appengine kit",
+		majorVersion,
+		minorVersion,
+		fixVersion,
+	)
+
+	return &appConfig{
+		info: &info,
+	}
 }

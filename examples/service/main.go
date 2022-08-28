@@ -15,35 +15,24 @@ import (
 	"github.com/txsvc/apikit"
 	"github.com/txsvc/apikit/api"
 	"github.com/txsvc/apikit/config"
-	"github.com/txsvc/apikit/internal"
+	"github.com/txsvc/apikit/helpers"
 	"github.com/txsvc/apikit/internal/auth"
 )
 
 func init() {
 	// initialize the config provider
-	config.InitConfigProvider(config.NewLocalConfigProvider())
+	config.SetProvider(config.NewLocalConfigProvider())
 
 	// create a default configuration for the service (if none exists)
-	path := filepath.Join(config.ResolveConfigLocation(), config.DefaultConfigFileName)
+	path := filepath.Join(config.ResolveConfigLocation(), config.DefaultConfigName)
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		os.MkdirAll(filepath.Dir(path), os.ModePerm)
 
-		// create credentials and keys
-		cfg, err := internal.InitSettings(config.Name(), config.Name())
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		// defaults from this config provider
-		def := config.GetDefaultSettings()
-
-		// copy the credentials and api keys
-		def.Credentials = cfg.Credentials
-		def.APIKey = cfg.APIKey
-		def.Scopes = append(def.Scopes, auth.ScopeApiAdmin)
+		// create credentials and keys with defaults from this config provider
+		cfg := config.GetConfig().Settings()
 
 		// save the new configuration
-		def.WriteToFile(path)
+		helpers.WriteDialSettings(cfg, path)
 	}
 
 	// initialize the credentials store
@@ -105,7 +94,7 @@ func pingEndpoint(c echo.Context) error {
 
 	resp := api.StatusObject{
 		Status:  http.StatusOK,
-		Message: fmt.Sprintf("version: %s", config.VersionString()),
+		Message: fmt.Sprintf("version: %s", config.GetConfig().Info().VersionString()),
 	}
 
 	return api.StandardResponse(c, http.StatusOK, resp)

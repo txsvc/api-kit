@@ -2,7 +2,6 @@ package config
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -12,34 +11,49 @@ import (
 )
 
 const (
-	DefaultConfigDirLocation = "./.config"
-	DefaultConfigFileName    = "config"
-
+	// runtime settings
+	PortEnv        = "PORT"
+	APIEndpointENV = "API_ENDPOINT"
+	// client settings
+	ForceTraceEnv = "APIKIT_FORCE_TRACE"
+	// config settings
 	ConfigDirLocationENV = "CONFIG_LOCATION"
-	APIEndpointENV       = "API_ENDPOINT"
+
+	DefaultConfigName     = "config"
+	DefaultConfigLocation = "./.config"
+	DefaultEndpoint       = "http://localhost:8080" // only really useful for testing ...
 )
 
 type (
-	ConfigProviderFunc func() interface{}
+	// Info holds static information about a service or API
+	Info struct {
+		// name: the service's name in human-usable form
+		name string
+		// shortName: the abreviated version of the service's name
+		shortName string
+		// copyright: info on the copyright/owner of the service/api
+		copyright string
+		// about: a short description of the service/api
+		about string
+		// majorVersion: the major version of the service/api
+		majorVersion int
+		// minorVersion: the minor version of the service/api
+		minorVersion int
+		// fixVersion: the fix/patch version of the service/api
+		fixVersion int
+	}
 
 	Configurator interface {
-		Name() string      // name of the project / the real etc
-		ShortName() string // abreviated name, used for e.g. the cli tool
-		Copyright() string
-		About() string
-
-		MajorVersion() int
-		MinorVersion() int
-		FixVersion() int
-
-		DefaultConfigLocation() string // default: ./.config
-
-		GetConfigLocation() string // same as DefaultConfigLocation() unless explicitly set
+		// AppInfo returns static information about the app or service
+		Info() *Info
+		// GetScopes returns the user-provided scopes, if set, or else falls back to the default scopes.
+		GetScopes() []string
+		// GetConfigLocation returns the path to the config location, if set, or the default location otherwise.
+		GetConfigLocation() string // './.config' unless explicitly set.
+		// SetConfigLocation explicitly sets the location where the configuration is expected. The location's existence is NOT verified.
 		SetConfigLocation(string)
-
-		// client & endpoint settings and credentials
-		GetDefaultSettings() *settings.Settings
-		GetSettings() *settings.Settings
+		// Settings returns the app settings, if configured, or falls back to a default, minimal configuration
+		Settings() *settings.DialSettings
 	}
 )
 
@@ -51,126 +65,41 @@ var (
 	// ErrInvalidConfiguration indicates that parameters used to configure the service were invalid
 	ErrInvalidConfiguration = errors.New("invalid configuration")
 
-	confProvider interface{}
+	// the config "singleton"
+	config_ interface{}
 )
 
 func init() {
 	// makes sure that SOMETHING is initialized
-	InitConfigProvider(NewSimpleConfigProvider())
+	SetProvider(NewLocalConfigProvider())
 }
 
-func InitConfigProvider(provider interface{}) {
-	confProvider = provider
+func SetProvider(provider interface{}) {
+	config_ = provider
 }
 
-func VersionString() string {
-	return fmt.Sprintf("%d.%d.%d", MajorVersion(), MinorVersion(), FixVersion())
-}
-
-func UserAgentString() string {
-	return fmt.Sprintf("%s %d.%d.%d", ShortName(), MajorVersion(), MinorVersion(), FixVersion())
-}
-
-func ServerString() string {
-	return fmt.Sprintf("%s %d.%d.%d", ShortName(), MajorVersion(), MinorVersion(), FixVersion())
-}
-
-func Name() string {
-	if confProvider == nil {
-		log.Fatal(ErrMissingConfigurator)
-	}
-	return confProvider.(Configurator).Name()
-}
-
-func ShortName() string {
-	if confProvider == nil {
-		log.Fatal(ErrMissingConfigurator)
-	}
-	return confProvider.(Configurator).ShortName()
-}
-
-func Copyright() string {
-	if confProvider == nil {
-		log.Fatal(ErrMissingConfigurator)
-	}
-	return confProvider.(Configurator).Copyright()
-}
-
-func About() string {
-	if confProvider == nil {
-		log.Fatal(ErrMissingConfigurator)
-	}
-	return confProvider.(Configurator).About()
-}
-
-func MajorVersion() int {
-	if confProvider == nil {
-		log.Fatal(ErrMissingConfigurator)
-	}
-	return confProvider.(Configurator).MajorVersion()
-}
-
-func MinorVersion() int {
-	if confProvider == nil {
-		log.Fatal(ErrMissingConfigurator)
-	}
-	return confProvider.(Configurator).MinorVersion()
-}
-func FixVersion() int {
-	if confProvider == nil {
-		log.Fatal(ErrMissingConfigurator)
-	}
-	return confProvider.(Configurator).FixVersion()
-}
-
-// DefaultConfigLocation returns a default location e.g. %HOME/.config
-func DefaultConfigLocation() string {
-	if confProvider == nil {
-		log.Fatal(ErrMissingConfigurator)
-	}
-	return confProvider.(Configurator).DefaultConfigLocation()
-}
-
-// ConfigLocation returns the actual location or DefaultConfigLocation() if undefined
-func GetConfigLocation() string {
-	if confProvider == nil {
-		log.Fatal(ErrMissingConfigurator)
-	}
-	return confProvider.(Configurator).GetConfigLocation()
+func GetConfig() Configurator {
+	return config_.(Configurator)
 }
 
 // SetConfigLocation sets the actual location without checking if the location actually exists !
 func SetConfigLocation(loc string) {
-	if confProvider == nil {
+	if config_ == nil {
 		log.Fatal(ErrMissingConfigurator)
 	}
-	confProvider.(Configurator).SetConfigLocation(loc)
+	config_.(Configurator).SetConfigLocation(loc)
 }
 
 // ResolveConfigLocation returns the full path to the config location
 func ResolveConfigLocation() string {
-	cl := GetConfigLocation()
+	cl := GetConfig().GetConfigLocation()
 	if strings.HasPrefix(cl, ".") {
 		// relative to working dir
 		wd, err := os.Getwd()
 		if err != nil {
-			return DefaultConfigLocation()
+			return GetConfig().GetConfigLocation()
 		}
 		return filepath.Join(wd, cl)
 	}
-	return GetConfigLocation()
-}
-
-func GetDefaultSettings() *settings.Settings {
-	if confProvider == nil {
-		log.Fatal(ErrMissingConfigurator)
-	}
-	return confProvider.(Configurator).GetDefaultSettings()
-}
-
-func GetSettings() *settings.Settings {
-	if confProvider == nil {
-		log.Fatal(ErrMissingConfigurator)
-	}
-	return confProvider.(Configurator).GetSettings()
+	return cl
 }

@@ -1,5 +1,8 @@
 package helpers
 
+// THIS HAS NOTHING TODO WITH ANY CRYPTO BS,
+// it's only that there is a usable pass-phrase/mnemonic implementation there !
+
 import (
 	"errors"
 	"strings"
@@ -12,8 +15,10 @@ const (
 	MinWordsInPassPhrase = 11
 )
 
-// ErrInvalidPassPhrase indicates that the pass phrase is too short
-var ErrInvalidPassPhrase = errors.New("invalid pass phrase")
+var (
+	// ErrInvalidPassPhrase indicates that the pass phrase is too short
+	ErrInvalidPassPhrase = errors.New("invalid pass phrase")
+)
 
 func CreateMnemonic(phrase string) (string, error) {
 	mnemonicPhrase := ""
