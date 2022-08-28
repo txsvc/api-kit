@@ -40,11 +40,9 @@ type (
 		fixVersion int
 	}
 
-	Configurator interface {
+	ConfigProvider interface {
 		// AppInfo returns static information about the app or service
 		Info() *Info
-		// GetScopes returns the user-provided scopes, if set, or else falls back to the default scopes.
-		GetScopes() []string
 		// ConfigLocation returns the path to the config location, if set, or the default location otherwise.
 		ConfigLocation() string // './.config' unless explicitly set.
 		// SetConfigLocation explicitly sets the location where the configuration is expected. The location's existence is NOT verified.
@@ -63,7 +61,7 @@ var (
 	ErrInvalidConfiguration = errors.New("invalid configuration")
 
 	// the config "singleton"
-	config_ Configurator
+	config_ ConfigProvider
 )
 
 func init() {
@@ -71,11 +69,11 @@ func init() {
 	SetProvider(NewLocalConfigProvider())
 }
 
-func SetProvider(provider Configurator) {
+func SetProvider(provider ConfigProvider) {
 	config_ = provider
 }
 
-func GetConfig() Configurator {
+func GetConfig() ConfigProvider {
 	return config_
 }
 

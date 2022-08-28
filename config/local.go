@@ -23,7 +23,7 @@ const (
 type (
 	localConfig struct {
 		// the interface to implement
-		Configurator
+		ConfigProvider
 
 		// app info
 		info *Info
@@ -35,7 +35,7 @@ type (
 	}
 )
 
-func NewLocalConfigProvider() Configurator {
+func NewLocalConfigProvider() ConfigProvider {
 
 	// get the current working dir. abort on error
 	dir, err := os.Getwd()
@@ -62,13 +62,6 @@ func NewLocalConfigProvider() Configurator {
 
 func (c *localConfig) Info() *Info {
 	return c.info
-}
-
-func (c *localConfig) GetScopes() []string {
-	if c.cfg_ != nil {
-		return c.cfg_.GetScopes()
-	}
-	return defaultScopes()
 }
 
 // ConfigLocation returns the config location that was set using SetConfigLocation().

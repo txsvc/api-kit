@@ -14,7 +14,7 @@ func TestInitLocalProvider(t *testing.T) {
 
 	assert.NotNil(t, cfg.Info())
 	assert.NotNil(t, cfg.Settings())
-	assert.NotEmpty(t, cfg.GetScopes())
+	assert.NotEmpty(t, cfg.Settings().GetScopes())
 }
 
 func TestConfigLocation(t *testing.T) {

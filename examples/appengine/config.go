@@ -14,13 +14,6 @@ func (c *appConfig) Info() *config.Info {
 	return c.info
 }
 
-func (c *appConfig) GetScopes() []string {
-	if c.cfg_ != nil {
-		return c.cfg_.GetScopes()
-	}
-	return defaultScopes()
-}
-
 // ConfigLocation returns the config location that was set using SetConfigLocation().
 // If no location is defined, GetConfigLocation looks for ENV['CONFIG_LOCATION'] or
 // returns DefaultConfigLocation() if no environment variable was set.

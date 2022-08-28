@@ -59,7 +59,7 @@ func InitEndpoint(c echo.Context) error {
 	// create a brand new instance so that the client can't sneak anything in we don't want
 	cfg := settings.DialSettings{
 		Credentials:   cfg_.Credentials.Clone(),
-		DefaultScopes: config.GetConfig().GetScopes(),
+		DefaultScopes: config.GetConfig().Settings().GetScopes(),
 	}
 
 	// prepare the settings for registration

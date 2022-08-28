@@ -33,7 +33,7 @@ const (
 type (
 	appConfig struct {
 		// the interface to implement
-		config.Configurator
+		config.ConfigProvider
 
 		// some implementation specifc data
 		info *config.Info
@@ -111,7 +111,7 @@ func pingEndpoint(c echo.Context) error {
 	return api.StandardResponse(c, http.StatusOK, resp)
 }
 
-func NewAppEngineConfigProvider() config.Configurator {
+func NewAppEngineConfigProvider() config.ConfigProvider {
 	info := config.NewAppInfo(
 		"appengine kit",
 		"aek",
