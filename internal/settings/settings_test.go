@@ -32,17 +32,6 @@ func TestOptions(t *testing.T) {
 	assert.Equal(t, "x", opt)
 }
 
-func TestCloneCredentials(t *testing.T) {
-	cred := Credentials{
-		ProjectID: "p",
-		UserID:    "u",
-		Token:     "t",
-		Expires:   10,
-	}
-	dup := cred.Clone()
-	assert.Equal(t, &cred, dup)
-}
-
 func TestCloneSettings(t *testing.T) {
 	s1 := Settings{
 		Endpoint:  "ep",

@@ -14,8 +14,8 @@ import (
 	"github.com/txsvc/apikit"
 	"github.com/txsvc/apikit/api"
 	"github.com/txsvc/apikit/config"
+	"github.com/txsvc/apikit/helpers"
 	"github.com/txsvc/apikit/internal/auth"
-	"github.com/txsvc/apikit/internal/settings"
 )
 
 const (
@@ -49,7 +49,7 @@ func init() {
 		cfg := config.GetDefaultSettings()
 
 		// save the new configuration
-		settings.WriteSettingsToFile(cfg, path)
+		helpers.WriteSettingsToFile(cfg, path)
 	}
 
 	// initialize the credentials store

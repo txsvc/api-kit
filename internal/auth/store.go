@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"sync"
 
+	"github.com/txsvc/apikit/helpers"
 	"github.com/txsvc/apikit/internal/settings"
 	"github.com/txsvc/stdlib/v2"
 )
@@ -38,7 +39,7 @@ func FlushAuthorizations(root string) {
 	if root != "" {
 		filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 			if !info.IsDir() {
-				cfg, err := settings.ReadSettingsFromFile(path)
+				cfg, err := helpers.ReadSettingsFromFile(path)
 				if err != nil {
 					return err // FIXME: this is never checked on exit !
 				}
@@ -83,7 +84,7 @@ func (c *authCache) Register(cfg *settings.Settings) error {
 
 	// write to the file store
 	path := filepath.Join(c.root, fileName(cfg.Credentials))
-	if err := settings.WriteSettingsToFile(cfg, path); err != nil {
+	if err := helpers.WriteSettingsToFile(cfg, path); err != nil {
 		return err
 	}
 
@@ -109,7 +110,7 @@ func (c *authCache) LookupByToken(token string) (*settings.Settings, error) {
 func (c *authCache) writeToStore(cfg *settings.Settings) error {
 	// write to the file store
 	path := filepath.Join(c.root, fileName(cfg.Credentials))
-	if err := settings.WriteSettingsToFile(cfg, path); err != nil {
+	if err := helpers.WriteSettingsToFile(cfg, path); err != nil {
 		return err
 	}
 	return nil

@@ -1,16 +1,17 @@
-package settings
+package helpers
 
 import (
 	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/txsvc/apikit/internal/settings"
 )
 
 const testCredentialFile = "test.json"
 
 func TestWriteReadSettings(t *testing.T) {
-	settings1 := &Settings{
+	settings1 := &settings.Settings{
 		Endpoint: "x",
 		//DefaultEndpoint: "X",
 		Scopes:        []string{"a", "b"},
@@ -34,7 +35,7 @@ func TestWriteReadSettings(t *testing.T) {
 }
 
 func TestWriteReadCredentials(t *testing.T) {
-	cred1 := &Credentials{
+	cred1 := &settings.Credentials{
 		ProjectID: "project",
 		UserID:    "user",
 		Token:     "token",

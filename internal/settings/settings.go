@@ -6,9 +6,6 @@ package settings
 
 import (
 	"io/fs"
-	"strings"
-
-	"github.com/txsvc/stdlib/v2"
 )
 
 const (
@@ -25,31 +22,21 @@ type (
 	State int
 
 	// Settings holds information needed to establish a connection with a
-	// backend API service or to simply configure some code.
+	// backend API service or to simply configure a service or CLI.
 	Settings struct {
 		Endpoint string `json:"endpoint,omitempty"`
+
+		Credentials *Credentials `json:"credentials,omitempty"`
 
 		Scopes        []string `json:"scopes,omitempty"`
 		DefaultScopes []string `json:"default_scopes,omitempty"`
 
-		Credentials *Credentials `json:"credentials,omitempty"`
-		Status      State        `json:"status,omitempty"`
-
-		//InternalCredentials *Credentials `json:"internal_credentials,omitempty"`
-		//CredentialsFile     string       `json:"credentials_file,omitempty"`
-		//NoAuth              bool         `json:"no_auth,omitempty"`
-
 		UserAgent string `json:"user_agent,omitempty"`
 		APIKey    string `json:"api_key,omitempty"` // aka ClientID
 
-		Options map[string]string `json:"options,omitempty"` // holds all other values ...
-	}
+		Status State `json:"status,omitempty"`
 
-	Credentials struct {
-		ProjectID string `json:"project_id,omitempty"` // may be empty
-		UserID    string `json:"user_id,omitempty"`    // may be empty, aka client_id
-		Token     string `json:"token,omitempty"`      // may be empty
-		Expires   int64  `json:"expires,omitempty"`    // 0 = never, < 0 = invalid, > 0 = unix timestamp
+		Options map[string]string `json:"options,omitempty"` // holds all other values ...
 	}
 )
 
@@ -110,30 +97,4 @@ func (ds *Settings) SetOption(opt, o string) {
 		ds.Options = make(map[string]string)
 	}
 	ds.Options[opt] = o
-}
-
-func (c *Credentials) Clone() *Credentials {
-	return &Credentials{
-		ProjectID: c.ProjectID,
-		UserID:    c.UserID,
-		Token:     c.Token,
-		Expires:   c.Expires,
-	}
-}
-
-func (c *Credentials) Key() string {
-	return strings.ToLower(c.ProjectID + "." + c.UserID) // FIXME: make it a md5 ?
-}
-
-// IsValid test if Crendentials is valid
-func (c *Credentials) IsValid() bool {
-	// attributes must be set
-	if len(c.Token) == 0 || len(c.ProjectID) == 0 || len(c.UserID) == 0 {
-		return false
-	}
-
-	if c.Expires == 0 {
-		return true
-	}
-	return c.Expires > stdlib.Now()
 }

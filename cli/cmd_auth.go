@@ -125,7 +125,7 @@ func InitCommand(c *cli.Context) error {
 
 	// finally save the file
 	pathToFile := filepath.Join(config.ResolveConfigLocation(), config.DefaultConfigFileName)
-	if err := settings.WriteSettingsToFile(cfg, pathToFile); err != nil {
+	if err := helpers.WriteSettingsToFile(cfg, pathToFile); err != nil {
 		return config.ErrInitializingConfiguration
 	}
 
@@ -169,7 +169,7 @@ func LoginCommand(c *cli.Context) error {
 	}
 
 	pathToFile := filepath.Join(config.ResolveConfigLocation(), config.DefaultConfigFileName)
-	if err := settings.WriteSettingsToFile(cfg, pathToFile); err != nil {
+	if err := helpers.WriteSettingsToFile(cfg, pathToFile); err != nil {
 		return config.ErrInitializingConfiguration
 	}
 
@@ -204,7 +204,7 @@ func LogoutCommand(c *cli.Context) error {
 	cfg.Status = settings.StateUndefined // LOGGED_OUT
 
 	pathToFile := filepath.Join(config.ResolveConfigLocation(), config.DefaultConfigFileName)
-	if err := settings.WriteSettingsToFile(cfg, pathToFile); err != nil {
+	if err := helpers.WriteSettingsToFile(cfg, pathToFile); err != nil {
 		return config.ErrInitializingConfiguration
 	}
 

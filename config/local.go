@@ -7,8 +7,17 @@ import (
 
 	"github.com/txsvc/stdlib/v2"
 
+	"github.com/txsvc/apikit/helpers"
 	"github.com/txsvc/apikit/internal/auth"
 	"github.com/txsvc/apikit/internal/settings"
+)
+
+// the below version numbers should match the git release tags,
+// i.e. there should be a version 'v0.1.0' !
+const (
+	majorVersion = 0
+	minorVersion = 1
+	fixVersion   = 0
 )
 
 type (
@@ -89,11 +98,11 @@ func (c *localConfig) GetSettings() *settings.Settings {
 
 	// try to load the dial settings
 	pathToFile := filepath.Join(ResolveConfigLocation(), DefaultConfigFileName)
-	cfg, err := settings.ReadSettingsFromFile(pathToFile)
+	cfg, err := helpers.ReadSettingsFromFile(pathToFile)
 	if err != nil {
 		cfg = GetDefaultSettings()
 		// save to the default location
-		if err = settings.WriteSettingsToFile(cfg, pathToFile); err != nil {
+		if err = helpers.WriteSettingsToFile(cfg, pathToFile); err != nil {
 			log.Fatal(err)
 		}
 	}
