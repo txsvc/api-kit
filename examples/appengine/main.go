@@ -57,7 +57,7 @@ func init() {
 		helpers.WriteDialSettings(cfg, path)
 	}
 
-	// initialize the credentials store
+	// FIXME: this is a duplicate, auth.init() already does this. Should initialize the auth provider instead
 	auth.FlushAuthorizations("")
 }
 

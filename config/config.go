@@ -43,12 +43,12 @@ type (
 	ConfigProvider interface {
 		// AppInfo returns static information about the app or service
 		Info() *Info
+		// Settings returns the app settings, if configured, or falls back to a default, minimal configuration
+		Settings() *settings.DialSettings
 		// ConfigLocation returns the path to the config location, if set, or the default location otherwise.
 		ConfigLocation() string // './.config' unless explicitly set.
 		// SetConfigLocation explicitly sets the location where the configuration is expected. The location's existence is NOT verified.
 		SetConfigLocation(string)
-		// Settings returns the app settings, if configured, or falls back to a default, minimal configuration
-		Settings() *settings.DialSettings
 	}
 )
 
