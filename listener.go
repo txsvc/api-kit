@@ -54,7 +54,7 @@ func (a *App) listen(addr, certFile, keyFile string, useTLS bool) {
 		}
 		s := http.Server{
 			Addr:      port,
-			Handler:   a.mux, // set Echo as handler
+			Handler:   a.svc, // set Echo as handler
 			TLSConfig: &tlsc,
 		}
 		if err := s.ListenAndServeTLS("", ""); err != http.ErrServerClosed {
@@ -63,6 +63,6 @@ func (a *App) listen(addr, certFile, keyFile string, useTLS bool) {
 	} else {
 		// simply startup without TLS
 		port := fmt.Sprintf(":%s", stringsx.TakeOne(stdlib.GetString(config.PortEnv, addr), PORT_DEFAULT))
-		log.Fatal(a.mux.Start(port))
+		log.Fatal(a.svc.Start(port))
 	}
 }

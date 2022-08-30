@@ -31,7 +31,7 @@ type (
 		rootDir string // the current working dir
 		confDir string // the fully qualified path to the conf dir
 		// cached settings
-		cfg_ *settings.DialSettings
+		ds *settings.DialSettings
 	}
 )
 
@@ -76,14 +76,14 @@ func (c *localConfig) ConfigLocation() string {
 
 func (c *localConfig) SetConfigLocation(loc string) {
 	c.confDir = loc
-	if c.cfg_ != nil {
-		c.cfg_ = nil // force a reload the next time GetSettings() is called ...
+	if c.ds != nil {
+		c.ds = nil // force a reload the next time GetSettings() is called ...
 	}
 }
 
 func (c *localConfig) Settings() *settings.DialSettings {
-	if c.cfg_ != nil {
-		return c.cfg_
+	if c.ds != nil {
+		return c.ds
 	}
 
 	// try to load the dial settings
@@ -101,8 +101,8 @@ func (c *localConfig) Settings() *settings.DialSettings {
 	cfg.Endpoint = stdlib.GetString(APIEndpointENV, cfg.Endpoint)
 
 	// make it available for future calls
-	c.cfg_ = cfg
-	return c.cfg_
+	c.ds = cfg
+	return c.ds
 }
 
 func (c *localConfig) defaultSettings() *settings.DialSettings {

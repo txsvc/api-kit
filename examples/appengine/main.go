@@ -37,7 +37,7 @@ type (
 
 		// some implementation specifc data
 		info *config.Info
-		cfg_ *settings.DialSettings
+		ds   *settings.DialSettings
 	}
 )
 

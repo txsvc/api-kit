@@ -41,25 +41,25 @@ type (
 	}
 )
 
-func NewClient(cfg *settings.DialSettings, logger logger.Logger) (*Client, error) {
-	var cfg_ *settings.DialSettings
+func NewClient(ds *settings.DialSettings, logger logger.Logger) (*Client, error) {
+	var _ds *settings.DialSettings
 
 	httpClient := NewTransport(logger, http.DefaultTransport)
 
 	// create or clone the settings
-	if cfg != nil {
-		c := cfg.Clone()
-		cfg_ = &c
+	if ds != nil {
+		c := ds.Clone()
+		_ds = &c
 	} else {
-		cfg_ = config.GetConfig().Settings()
-		if cfg_.Credentials == nil {
-			cfg_.Credentials = &settings.Credentials{} // just provide something to prevent NPEs further down
+		_ds = config.GetConfig().Settings()
+		if _ds.Credentials == nil {
+			_ds.Credentials = &settings.Credentials{} // just provide something to prevent NPEs further down
 		}
 	}
 
 	return &Client{
 		httpClient: httpClient,
-		cfg:        cfg_,
+		cfg:        _ds,
 		logger:     logger,
 		userAgent:  config.GetConfig().Info().UserAgentString(),
 		trace:      stdlib.GetString(config.ForceTraceEnv, ""),

@@ -8,8 +8,10 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
-	"github.com/txsvc/apikit/config"
+
 	"github.com/ziflex/lecho/v3"
+
+	"github.com/txsvc/apikit/config"
 )
 
 const (
@@ -22,63 +24,56 @@ const (
 )
 
 type (
-	// SetupFunc creates a new, fully configured mux
+	// SetupFunc creates a new, fully configured router
 	SetupFunc func() *echo.Echo
-	// ShutdownFunc is called before the server stops
+	// ShutdownFunc is called before the app stops
 	ShutdownFunc func(context.Context, *App) error
 
 	// app holds all configs for the listener
 	App struct {
-		mux      *echo.Echo
-		shutdown ShutdownFunc
+		svc *echo.Echo
+
+		shutdown      ShutdownFunc
+		shutdownDelay time.Duration
 
 		// other settings
-		logLevel      log.Lvl
-		shutdownDelay time.Duration
-		root          string
+		logLevel log.Lvl
+		root     string
 	}
 )
 
 // New creates a new service listener instance and configures it with sensible defaults.
-//
-// The following ENV variables are supported:
-// - PORT: default 8080
-// - CONFIG_LOCATION: default ./.config
-// - LOG_LEVEL: default INFO
-//
-// - force_ssl: default false
-// - secret_key_base:
-// - public_file_server: default false
 func New(setupFunc SetupFunc, shutdownFunc ShutdownFunc) (*App, error) {
 	if setupFunc == nil || shutdownFunc == nil {
 		return nil, config.ErrInvalidConfiguration
 	}
 
 	app := &App{
-		mux:           setupFunc(),
+		svc:           setupFunc(),
 		shutdown:      shutdownFunc,
 		logLevel:      log.INFO,
 		shutdownDelay: ShutdownDelay * time.Second,
 	}
 
-	if app.mux == nil {
+	if app.svc == nil {
 		return nil, config.ErrInvalidConfiguration
 	}
 
 	// no greetings
-	app.mux.HideBanner = true
+	app.svc.HideBanner = true
 
 	// add a logger and middleware
 	logger := lecho.New(os.Stdout)
-	app.mux.Logger.SetLevel(app.logLevel)
-	app.mux.Logger = logger
+	app.svc.Logger = logger
+	app.svc.Logger.SetLevel(app.logLevel)
 
-	app.mux.Use(middleware.RequestID())
-	app.mux.Use(lecho.Middleware(lecho.Config{
+	// adding logging related middleware
+	app.svc.Use(middleware.RequestID())
+	app.svc.Use(lecho.Middleware(lecho.Config{
 		Logger: logger,
 	}))
 
-	// add a default error handler
+	// FIXME: add a default error handler
 	// app.mux.HTTPErrorHandler = ...
 
 	// the root dir for the config
@@ -100,11 +95,11 @@ func (a *App) Stop() {
 
 	// call the implementation specific shoutdown code to clean-up
 	if err := a.shutdown(ctx, a); err != nil {
-		a.mux.Logger.Fatal(err)
+		a.svc.Logger.Fatal(err)
 	}
 
 	// shutdown of the framework
-	if err := a.mux.Shutdown(ctx); err != nil {
-		a.mux.Logger.Fatal(err)
+	if err := a.svc.Shutdown(ctx); err != nil {
+		a.svc.Logger.Fatal(err)
 	}
 }

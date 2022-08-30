@@ -26,8 +26,8 @@ func ReadDialSettings(path string) (*settings.DialSettings, error) {
 	return &ds, nil
 }
 
-func WriteDialSettings(cfg *settings.DialSettings, path string) error {
-	buf, err := json.MarshalIndent(cfg, "", indentChar)
+func WriteDialSettings(ds *settings.DialSettings, path string) error {
+	buf, err := json.MarshalIndent(ds, "", indentChar)
 	if err != nil {
 		return err
 	}

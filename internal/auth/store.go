@@ -51,47 +51,47 @@ func FlushAuthorizations(root string) {
 	}
 }
 
-func RegisterAuthorization(cfg *settings.DialSettings) error {
-	return cache.Register(cfg)
+func RegisterAuthorization(ds *settings.DialSettings) error {
+	return cache.Register(ds)
 }
 
 func LookupByToken(token string) (*settings.DialSettings, error) {
 	return cache.LookupByToken(token)
 }
 
-func UpdateStore(cfg *settings.DialSettings) error {
-	if _, err := cache.LookupByToken(cfg.Credentials.Token); err != nil {
+func UpdateStore(ds *settings.DialSettings) error {
+	if _, err := cache.LookupByToken(ds.Credentials.Token); err != nil {
 		return err // only allow to write already registered settings
 	}
-	return cache.writeToStore(cfg)
+	return cache.writeToStore(ds)
 }
 
-func (c *authCache) Register(cfg *settings.DialSettings) error {
+func (c *authCache) Register(ds *settings.DialSettings) error {
 
-	_log.Debugf("register. t=%s/%s", cfg.Credentials.Token, fileName(cfg.Credentials))
+	_log.Debugf("register. t=%s/%s", ds.Credentials.Token, fileName(ds.Credentials))
 
 	// check if the settings already exists
-	if a, ok := c.idToAuth[cfg.Credentials.Key()]; ok {
+	if a, ok := c.idToAuth[ds.Credentials.Key()]; ok {
 		if a.Status == settings.StateAuthorized {
 			_log.Errorf("already authorized. t=%s, state=%d", a.Credentials.Token, a.Status)
 			return ErrAlreadyAuthorized
 		}
 
 		// remove from token lookup if the token changed
-		if a.Credentials.Token != cfg.Credentials.Token {
+		if a.Credentials.Token != ds.Credentials.Token {
 			delete(c.tokenToAuth, a.Credentials.Token)
 		}
 	}
 
 	// write to the file store
-	path := filepath.Join(c.root, fileName(cfg.Credentials))
-	if err := helpers.WriteDialSettings(cfg, path); err != nil {
+	path := filepath.Join(c.root, fileName(ds.Credentials))
+	if err := helpers.WriteDialSettings(ds, path); err != nil {
 		return err
 	}
 
 	// update to the cache
-	c.tokenToAuth[cfg.Credentials.Token] = cfg
-	c.idToAuth[cfg.Credentials.Key()] = cfg
+	c.tokenToAuth[ds.Credentials.Token] = ds
+	c.idToAuth[ds.Credentials.Key()] = ds
 
 	return nil
 }
@@ -108,10 +108,10 @@ func (c *authCache) LookupByToken(token string) (*settings.DialSettings, error) 
 	return nil, nil // FIXME: return an error ?
 }
 
-func (c *authCache) writeToStore(cfg *settings.DialSettings) error {
+func (c *authCache) writeToStore(ds *settings.DialSettings) error {
 	// write to the file store
-	path := filepath.Join(c.root, fileName(cfg.Credentials))
-	if err := helpers.WriteDialSettings(cfg, path); err != nil {
+	path := filepath.Join(c.root, fileName(ds.Credentials))
+	if err := helpers.WriteDialSettings(ds, path); err != nil {
 		return err
 	}
 	return nil

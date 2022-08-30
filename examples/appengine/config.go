@@ -26,12 +26,12 @@ func (c *appConfig) SetConfigLocation(loc string) {
 }
 
 func (c *appConfig) Settings() *settings.DialSettings {
-	if c.cfg_ != nil {
-		return c.cfg_
+	if c.ds != nil {
+		return c.ds
 	}
 	// make it available for future calls
-	c.cfg_ = c.defaultSettings()
-	return c.cfg_
+	c.ds = c.defaultSettings()
+	return c.ds
 }
 
 func (c *appConfig) defaultSettings() *settings.DialSettings {
