@@ -39,7 +39,7 @@ func (a *App) listen(addr, certFile, keyFile string, useTLS bool) {
 	}()
 
 	if useTLS {
-		port := fmt.Sprintf(":%s", stringsx.TakeOne(stdlib.GetString(config.PortEnv, addr), PORT_DEFAULT_TLS))
+		port := fmt.Sprintf(":%s", stringsx.TakeOne(stdlib.GetString(config.PortENV, addr), PORT_DEFAULT_TLS))
 		certDir := fmt.Sprintf("%s/.cert", a.root)
 
 		autoTLSManager := autocert.Manager{
@@ -62,7 +62,7 @@ func (a *App) listen(addr, certFile, keyFile string, useTLS bool) {
 		}
 	} else {
 		// simply startup without TLS
-		port := fmt.Sprintf(":%s", stringsx.TakeOne(stdlib.GetString(config.PortEnv, addr), PORT_DEFAULT))
+		port := fmt.Sprintf(":%s", stringsx.TakeOne(stdlib.GetString(config.PortENV, addr), PORT_DEFAULT))
 		log.Fatal(a.svc.Start(port))
 	}
 }

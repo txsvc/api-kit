@@ -62,7 +62,7 @@ func NewClient(ds *settings.DialSettings, logger logger.Logger) (*Client, error)
 		cfg:        _ds,
 		logger:     logger,
 		userAgent:  config.GetConfig().Info().UserAgentString(),
-		trace:      stdlib.GetString(config.ForceTraceEnv, ""),
+		trace:      stdlib.GetString(config.ForceTraceENV, ""),
 	}, nil // FIXME: nothing creates an error here, remove later?
 }
 
@@ -115,7 +115,8 @@ func (c *Client) roundTrip(req *http.Request, response interface{}) (int, error)
 		req.Header.Set("Authorization", "Bearer "+c.cfg.Credentials.Token)
 	}
 	if c.trace != "" {
-		req.Header.Set("Apikit-Force-Trace", c.trace)
+		req.Header.Set("X-Request-ID", c.trace)
+		req.Header.Set("X-Force-Trace", c.trace)
 	}
 
 	// perform the request

@@ -1,5 +1,7 @@
 package helpers
 
+// FIXME: move to stdlib !
+
 // THIS HAS NOTHING TODO WITH ANY CRYPTO BS,
 // it's only that there is a usable pass-phrase/mnemonic implementation there !
 

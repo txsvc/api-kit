@@ -36,7 +36,7 @@ func init() {
 	}
 
 	// initialize the credentials store
-	root := filepath.Join(config.GetConfig().ConfigLocation(), "cred")
+	root := filepath.Join(config.GetConfig().ConfigLocation(), config.DefaultCredentialsLocation)
 	auth.FlushAuthorizations(root)
 }
 

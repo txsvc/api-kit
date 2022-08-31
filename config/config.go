@@ -4,21 +4,24 @@ import (
 	"errors"
 	"log"
 
+	"github.com/txsvc/apikit/helpers"
 	"github.com/txsvc/apikit/internal/settings"
+	"github.com/txsvc/stdlib/v2"
 )
 
 const (
-	// runtime settings
-	PortEnv        = "PORT"
-	APIEndpointENV = "API_ENDPOINT"
-	// client settings
-	ForceTraceEnv = "APIKIT_FORCE_TRACE"
-	// config settings
-	ConfigDirLocationENV = "CONFIG_LOCATION"
+	PortENV              = "PORT"            // runtime settings
+	ConfigDirLocationENV = "CONFIG_LOCATION" // config settings
+	AppSessionKeyENV     = "APP_SESSION_KEY" // Session/Auth key used to encrypt cookies with
 
-	DefaultConfigName     = "config"
-	DefaultConfigLocation = "./.config"
-	DefaultEndpoint       = "http://localhost:8080" // only really useful for testing ...
+	APIEndpointENV = "API_ENDPOINT" // client settings
+	ForceTraceENV  = "APIKIT_FORCE_TRACE"
+
+	// Other constants
+	DefaultConfigName          = "config"
+	DefaultConfigLocation      = "./.config"
+	DefaultCredentialsLocation = "cred"
+	DefaultEndpoint            = "http://localhost:8080" // only really useful for testing ...
 )
 
 type (
@@ -62,6 +65,9 @@ var (
 
 	// the config "singleton"
 	config_ ConfigProvider
+
+	// the current session key
+	sessionKey = stdlib.GetString(AppSessionKeyENV, helpers.RandStringSimple(128))
 )
 
 func init() {
@@ -83,4 +89,9 @@ func SetConfigLocation(loc string) {
 		log.Fatal(ErrMissingConfigurator)
 	}
 	config_.SetConfigLocation(loc)
+}
+
+// AppSessionKey is initialized from ENV['APP_SESSION_KEY'] or randomly generated on startup, if not provided.
+func AppSessionKey() string {
+	return sessionKey
 }
