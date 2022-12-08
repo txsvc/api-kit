@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/txsvc/apikit/internal/settings"
+	"github.com/txsvc/apikit/settings"
 )
 
 const testCredentialFile = "test.json"

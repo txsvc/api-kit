@@ -13,10 +13,10 @@ import (
 
 	"github.com/txsvc/apikit"
 	"github.com/txsvc/apikit/api"
+	"github.com/txsvc/apikit/auth"
 	"github.com/txsvc/apikit/config"
 	"github.com/txsvc/apikit/helpers"
-	"github.com/txsvc/apikit/internal/auth"
-	"github.com/txsvc/apikit/internal/settings"
+	"github.com/txsvc/apikit/settings"
 )
 
 // the below version numbers should match the git release tags,
@@ -40,6 +40,22 @@ type (
 		ds   *settings.DialSettings
 	}
 )
+
+func NewAppEngineConfigProvider() config.ConfigProvider {
+	info := config.NewAppInfo(
+		"appengine kit",
+		"aek",
+		"Copyright 2022, transformative.services, https://txs.vc",
+		"about appengine kit",
+		majorVersion,
+		minorVersion,
+		fixVersion,
+	)
+
+	return &appConfig{
+		info: &info,
+	}
+}
 
 func init() {
 	// initialize the config provider
@@ -109,20 +125,4 @@ func pingEndpoint(c echo.Context) error {
 	}
 
 	return api.StandardResponse(c, http.StatusOK, resp)
-}
-
-func NewAppEngineConfigProvider() config.ConfigProvider {
-	info := config.NewAppInfo(
-		"appengine kit",
-		"aek",
-		"Copyright 2022, transformative.services, https://txs.vc",
-		"about appengine kit",
-		majorVersion,
-		minorVersion,
-		fixVersion,
-	)
-
-	return &appConfig{
-		info: &info,
-	}
 }

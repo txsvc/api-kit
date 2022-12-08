@@ -9,11 +9,11 @@ import (
 	"github.com/txsvc/stdlib/v2"
 
 	"github.com/txsvc/apikit/api"
+	"github.com/txsvc/apikit/auth"
 	"github.com/txsvc/apikit/config"
 	"github.com/txsvc/apikit/helpers"
-	"github.com/txsvc/apikit/internal/auth"
-	"github.com/txsvc/apikit/internal/settings"
 	"github.com/txsvc/apikit/logger"
+	"github.com/txsvc/apikit/settings"
 )
 
 func WithAuthCommands() []*cli.Command {

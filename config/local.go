@@ -7,9 +7,9 @@ import (
 
 	"github.com/txsvc/stdlib/v2"
 
+	"github.com/txsvc/apikit/auth"
 	"github.com/txsvc/apikit/helpers"
-	"github.com/txsvc/apikit/internal/auth"
-	"github.com/txsvc/apikit/internal/settings"
+	"github.com/txsvc/apikit/settings"
 )
 
 // the below version numbers should match the git release tags,

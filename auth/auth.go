@@ -8,8 +8,8 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"github.com/txsvc/apikit/internal/settings"
 	"github.com/txsvc/apikit/logger"
+	"github.com/txsvc/apikit/settings"
 )
 
 const (

@@ -8,8 +8,8 @@ all: test
 
 .PHONY: test
 test:
-	cd internal/auth && go test -covermode=atomic
-	cd internal/settings && go test -covermode=atomic
+	cd settings && go test -covermode=atomic
+	cd auth && go test -covermode=atomic
 	cd logger && go test -covermode=atomic
 	cd helpers && go test -covermode=atomic
 	cd api && go test -covermode=atomic
