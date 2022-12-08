@@ -3,9 +3,9 @@ package main
 import (
 	"github.com/txsvc/stdlib/v2"
 
+	"github.com/txsvc/apikit/auth"
 	"github.com/txsvc/apikit/config"
-	"github.com/txsvc/apikit/internal/auth"
-	"github.com/txsvc/apikit/internal/settings"
+	"github.com/txsvc/apikit/settings"
 )
 
 // FIXME: make this Google AppEngine specific !
@@ -49,6 +49,6 @@ func defaultScopes() []string {
 	// FIXME: this gives basic read access to the API. Is this what we want?
 	return []string{
 		auth.ScopeApiRead,
-		auth.ScopeApiWrite,
+		//auth.ScopeApiWrite,
 	}
 }

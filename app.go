@@ -8,7 +8,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
-
 	"github.com/ziflex/lecho/v3"
 
 	"github.com/txsvc/apikit/config"

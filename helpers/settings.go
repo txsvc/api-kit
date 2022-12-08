@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/txsvc/apikit/internal/settings"
+	"github.com/txsvc/apikit/settings"
 )
 
 const (

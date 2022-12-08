@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/txsvc/apikit/helpers"
-	"github.com/txsvc/apikit/internal/settings"
+	"github.com/txsvc/apikit/settings"
 	"github.com/txsvc/stdlib/v2"
 )
 

@@ -14,9 +14,9 @@ import (
 
 	"github.com/txsvc/apikit"
 	"github.com/txsvc/apikit/api"
+	"github.com/txsvc/apikit/auth"
 	"github.com/txsvc/apikit/config"
 	"github.com/txsvc/apikit/helpers"
-	"github.com/txsvc/apikit/internal/auth"
 )
 
 func init() {
