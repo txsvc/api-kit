@@ -16,6 +16,8 @@ COPY $SVC_NAME ${HOME}/bin/svc
 RUN chown -R 1001:0 ${APP_ROOT} && \
     chmod -R ug+rwx ${APP_ROOT}
 
+VOLUME ${HOME}
+
 WORKDIR ${HOME}
 EXPOSE 8080
 
