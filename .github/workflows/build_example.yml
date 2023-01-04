@@ -1,18 +1,18 @@
-name: build_example_api
+name: build_example
 
 on:
   push:
     branches: [ main ]
 
 env:
-  CONTAINER_IMAGE: exampleapi
+  CONTAINER_IMAGE: apikit_example
   CONTAINER_VERSION: 0.1.0
   REPOSITORY: ${{ secrets.REPOSITORY }}
   REPOSITORY_HOST: ${{ secrets.REPOSITORY_HOST }}
   GITHUB_SHA: ${{ github.sha }}
 
 jobs:
-  build_example_api:
+  build_example:
     runs-on: ubuntu-latest
 
     steps:
@@ -41,20 +41,20 @@ jobs:
           mkdir -p latest
           echo "$CONTAINER_VERSION-$GITHUB_SHA" > latest/version.txt
       
-      - name: build the ingress service
+      - name: build the example service
         run: |
-          cd cmd/cdn
+          cd examples/service
           go get -v -t -d ./...
           GOOS=linux GOARCH=amd64 go build -o svc main.go && chmod +x svc
       
-      - name: build the cdn container
+      - name: build the container
         run: |
-          cd cmd/cdn
+          cd examples/service
           docker build -t "$REPOSITORY_HOST"/"$REPOSITORY"/"$CONTAINER_IMAGE":"$GITHUB_SHA" \
             --build-arg GITHUB_SHA="$GITHUB_SHA" \
             --build-arg GITHUB_REF="$GITHUB_REF" .
       
-      - name: push the cdn container
+      - name: push the container
         run: |
           docker push $REPOSITORY_HOST/$REPOSITORY/$CONTAINER_IMAGE:$GITHUB_SHA
           docker tag $REPOSITORY_HOST/$REPOSITORY/$CONTAINER_IMAGE:$GITHUB_SHA $REPOSITORY_HOST/$REPOSITORY/$CONTAINER_IMAGE:latest
