@@ -9,6 +9,8 @@ EXPOSE 8080
 # copy the binary
 COPY $BUILD_NAME /usr/bin/svc
 
+# own it ...
+RUN chown 1001:1001 /usr/bin/svc
 # ... and make it executable
 RUN chmod +x /usr/bin/svc
 
