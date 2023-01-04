@@ -6,16 +6,12 @@ ENV BUILD_NAME svc
 
 EXPOSE 8080
 
-# Copy extra files to the image
-COPY ./run /root/usr/bin/
-
-#VOLUME /config
-#VOLUME /data
-
 # copy the binary
-COPY $BUILD_NAME /usr/bin/$BUILD_NAME
+COPY $BUILD_NAME /usr/bin/svc
 
-# make it executable
-RUN chmod +x /usr/bin/$BUILD_NAME
+# ... and make it executable
+RUN chmod +x /usr/bin/svc
 
-CMD ["/root/usr/bin/run"]
+USER 1001
+
+ENTRYPOINT ["/usr/bin/svc" "-tls", "false"]

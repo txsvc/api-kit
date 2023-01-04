@@ -71,6 +71,7 @@ func setup() *echo.Echo {
 	e = api.WithAuthEndpoints(e)
 
 	// add your own endpoints here
+	e.GET("/", api.DefaultEndpoint)
 	e.GET("/ping", pingEndpoint)
 
 	// done

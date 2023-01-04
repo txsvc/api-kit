@@ -1,60 +1,63 @@
-name: build_exampleapi
+name: build_example_api
 
 on:
   push:
-    branches: [ release ]
+    branches: [ main ]
 
 env:
-  IMAGE_NAME: exampleapi
-  IMAGE_VERSION: 0.1.0
-  REGISTRY: ${{ secrets.REGISTRY }}
-  REGISTRY_HOSTNAME: eu.gcr.io
+  CONTAINER_IMAGE: exampleapi
+  CONTAINER_VERSION: 0.1.0
+  REPOSITORY: ${{ secrets.REPOSITORY }}
+  REPOSITORY_HOST: ${{ secrets.REPOSITORY_HOST }}
   GITHUB_SHA: ${{ github.sha }}
-  
+
 jobs:
-  build:
+  build_example_api:
     runs-on: ubuntu-latest
 
     steps:
-    - name: setup go
-      uses: actions/setup-go@v2
-      with:
-        go-version: ^1.16
-      id: go
+      - name: setup go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ^1.19
+        id: go
 
-    - name: setup gcloud
-      uses: google-github-actions/setup-gcloud@master
-      with:
-        service_account_email: ${{ secrets.GCP_EMAIL }}
-        service_account_key: ${{ secrets.GCP_SA_KEY }}
-        export_default_credentials: true
+      - name: checkout code
+        uses: actions/checkout@v2
 
-    # Configure docker to use the gcloud command-line tool as a credential helper
-    - run: gcloud auth configure-docker    
+      - name: authenticate gcloud SDK
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: "${{ secrets.GCP_SA_KEY }}"
+        id: auth
 
-    - name: checkout code
-      uses: actions/checkout@v2
+      - name: setup gcloud SDK
+        uses: google-github-actions/setup-gcloud@v1
 
-    - name: get dependencies
-      run: cd examples/simple_api && go get -v -t -d ./...
+      - run: gcloud auth configure-docker $REPOSITORY_HOST
 
-    - name: build api
-      run: |
-        cd examples/simple_api
-        GOOS=linux GOARCH=amd64 go build -o svc main.go && chmod +x svc
-
-    - name: build container
-      run: |
-        cd examples/simple_api
-        docker build -t "$REGISTRY_HOSTNAME"/"$REGISTRY"/"$IMAGE_NAME":"$GITHUB_SHA" \
-          --build-arg GITHUB_SHA="$GITHUB_SHA" \
-          --build-arg GITHUB_REF="$GITHUB_REF" .
-
-    # Push the docker image to Google Container Registry
-    - name: push container
-      run: |
-        docker push $REGISTRY_HOSTNAME/$REGISTRY/$IMAGE_NAME:$GITHUB_SHA
-        docker tag $REGISTRY_HOSTNAME/$REGISTRY/$IMAGE_NAME:$GITHUB_SHA $REGISTRY_HOSTNAME/$REGISTRY/$IMAGE_NAME:latest
-        docker tag $REGISTRY_HOSTNAME/$REGISTRY/$IMAGE_NAME:$GITHUB_SHA $REGISTRY_HOSTNAME/$REGISTRY/$IMAGE_NAME:$IMAGE_VERSION
-        docker push $REGISTRY_HOSTNAME/$REGISTRY/$IMAGE_NAME:latest
-        docker push $REGISTRY_HOSTNAME/$REGISTRY/$IMAGE_NAME:$IMAGE_VERSION
+      - name: prepare release
+        run: |
+          mkdir -p latest
+          echo "$CONTAINER_VERSION-$GITHUB_SHA" > latest/version.txt
+      
+      - name: build the ingress service
+        run: |
+          cd cmd/cdn
+          go get -v -t -d ./...
+          GOOS=linux GOARCH=amd64 go build -o svc main.go && chmod +x svc
+      
+      - name: build the cdn container
+        run: |
+          cd cmd/cdn
+          docker build -t "$REPOSITORY_HOST"/"$REPOSITORY"/"$CONTAINER_IMAGE":"$GITHUB_SHA" \
+            --build-arg GITHUB_SHA="$GITHUB_SHA" \
+            --build-arg GITHUB_REF="$GITHUB_REF" .
+      
+      - name: push the cdn container
+        run: |
+          docker push $REPOSITORY_HOST/$REPOSITORY/$CONTAINER_IMAGE:$GITHUB_SHA
+          docker tag $REPOSITORY_HOST/$REPOSITORY/$CONTAINER_IMAGE:$GITHUB_SHA $REPOSITORY_HOST/$REPOSITORY/$CONTAINER_IMAGE:latest
+          docker tag $REPOSITORY_HOST/$REPOSITORY/$CONTAINER_IMAGE:$GITHUB_SHA $REPOSITORY_HOST/$REPOSITORY/$CONTAINER_IMAGE:$CONTAINER_VERSION
+          docker push $REPOSITORY_HOST/$REPOSITORY/$CONTAINER_IMAGE:latest
+          docker push $REPOSITORY_HOST/$REPOSITORY/$CONTAINER_IMAGE:$CONTAINER_VERSION
