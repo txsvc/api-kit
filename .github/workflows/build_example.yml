@@ -5,7 +5,7 @@ on:
     branches: [ main ]
 
 env:
-  CONTAINER_IMAGE: apikit_example
+  CONTAINER_IMAGE: apikit
   CONTAINER_VERSION: 0.1.0
   REPOSITORY: ${{ secrets.REPOSITORY }}
   REPOSITORY_HOST: ${{ secrets.REPOSITORY_HOST }}
