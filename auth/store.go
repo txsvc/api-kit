@@ -39,6 +39,10 @@ func FlushAuthorizations(root string) {
 
 	if root != "" {
 		filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+			if info == nil {
+				return nil
+			}
+
 			if !info.IsDir() {
 				cfg, err := helpers.ReadDialSettings(path)
 				if err != nil {
