@@ -5,6 +5,7 @@ on:
     branches: [ main ]
 
 env:
+  CONTEXT_DIR: examples/service
   CONTAINER_IMAGE: apikit
   CONTAINER_VERSION: 0.1.0
   REPOSITORY: ${{ secrets.REPOSITORY }}
@@ -35,24 +36,17 @@ jobs:
         uses: google-github-actions/setup-gcloud@v1
 
       - run: gcloud auth configure-docker $REPOSITORY_HOST
-
-      - name: prepare release
-        run: |
-          mkdir -p latest
-          echo "$CONTAINER_VERSION-$GITHUB_SHA" > latest/version.txt
       
-      - name: build the example service
+      - name: build the service
         run: |
-          cd examples/service
+          cd $CONTEXT_DIR
           go get -v -t -d ./...
-          GOOS=linux GOARCH=amd64 go build -o svc main.go && chmod +x svc
+          GOOS=linux GOARCH=amd64 go build -o svc main.go
       
       - name: build the container
         run: |
-          cd examples/service
-          docker build -t "$REPOSITORY_HOST"/"$REPOSITORY"/"$CONTAINER_IMAGE":"$GITHUB_SHA" \
-            --build-arg GITHUB_SHA="$GITHUB_SHA" \
-            --build-arg GITHUB_REF="$GITHUB_REF" .
+          cd $CONTEXT_DIR
+          docker build -t "$REPOSITORY_HOST"/"$REPOSITORY"/"$CONTAINER_IMAGE":"$GITHUB_SHA" .
       
       - name: push the container
         run: |
