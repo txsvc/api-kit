@@ -50,12 +50,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if !*useTLS {
+	if *useTLS {
+		// start listening on port 443
+		svc.ListenAutoTLS("")
+	} else {
 		// start listening on default port 8080
 		svc.Listen("")
-	} else {
-		// start listening on default port 443
-		svc.ListenAutoTLS("")
 	}
 }
 

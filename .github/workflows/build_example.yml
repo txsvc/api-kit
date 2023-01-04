@@ -41,7 +41,7 @@ jobs:
         run: |
           cd $CONTEXT_DIR
           go get -v -t -d ./...
-          GOOS=linux GOARCH=amd64 go build -o svc main.go && chmod +x svc
+          GOOS=linux GOARCH=amd64 go build -o svc main.go
       
       - name: build the container
         run: |
