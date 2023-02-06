@@ -4,7 +4,7 @@ USER root
 
 ENV SVC_NAME svc
 
-ENV CADDYFILE /config/caddy/Caddyfile
+ENV CADDYFILE /config/router/Caddyfile
 
 EXPOSE 80 443 2019
 
@@ -14,9 +14,9 @@ ENV XDG_DATA_HOME=/data
 
 RUN set -eux; \
 	mkdir -p \
-		/config/caddy \
-		/data/caddy \
-		/etc/caddy
+		/config/router \
+		/data/router \
+		/etc/router
 
 # Copy extra files to the image
 COPY ./run /root/usr/bin/
