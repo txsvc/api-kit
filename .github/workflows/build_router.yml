@@ -46,7 +46,7 @@ jobs:
       - name: build the container
         run: |
           cd $CONTEXT_DIR
-          docker build -t "$REPOSITORY_HOST"/"$REPOSITORY"/"$CONTAINER_IMAGE":"$GITHUB_SHA" .
+          docker build --rm=true -t "$REPOSITORY_HOST"/"$REPOSITORY"/"$CONTAINER_IMAGE":"$GITHUB_SHA" .
 
       - name: push the container
         run: |
