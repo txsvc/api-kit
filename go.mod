@@ -7,6 +7,7 @@ require (
 	github.com/PuerkitoBio/rehttp v1.1.0
 	github.com/alecthomas/chroma v0.10.0
 	github.com/bytom/bytom v1.1.1 // indirect
+	github.com/caddyserver/caddy/v2 v2.5.2
 	github.com/labstack/echo/v4 v4.8.0
 	github.com/labstack/gommon v0.3.1
 	github.com/logrusorgru/aurora v2.0.3+incompatible
@@ -16,5 +17,5 @@ require (
 	github.com/txsvc/stdlib/v2 v2.3.0
 	github.com/urfave/cli/v2 v2.11.2
 	github.com/ziflex/lecho/v3 v3.1.0
-	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5
+	golang.org/x/crypto v0.0.0-20220210151621-f4118a5b28e2
 )
