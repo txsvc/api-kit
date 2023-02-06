@@ -1,21 +1,34 @@
 FROM registry.access.redhat.com/ubi8-minimal
 
-ENV SVC_NAME svc
-
-ENV APP_ROOT=/opt/app-root \
-    DATA_ROOT=/opt/data \
-    HOME=/opt/app-root/src \
-    PATH=/opt/app-root/src/bin:/opt/app-root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-
 USER root
 
-VOLUME ${DATA_ROOT}
-RUN mkdir -p ${DATA_ROOT} && \
-    mkdir -p ${HOME}/bin
+ENV SVC_NAME svc
 
-COPY $SVC_NAME ${HOME}/bin/svc
+ENV CADDYFILE /config/caddy/Caddyfile
 
-WORKDIR ${HOME}
-EXPOSE 80 443
+EXPOSE 80 443 2019
 
-CMD ["svc"]
+# See https://caddyserver.com/docs/conventions#file-locations for details
+ENV XDG_CONFIG_HOME=/config
+ENV XDG_DATA_HOME=/data
+
+RUN set -eux; \
+	mkdir -p \
+		/config/caddy \
+		/data/caddy \
+		/etc/caddy
+
+# Copy extra files to the image
+COPY ./run /root/usr/bin/
+
+VOLUME /config
+VOLUME /data
+
+# copy the binary
+COPY $SVC_NAME /usr/bin/svc
+
+# make it executable
+RUN chmod +x /usr/bin/svc
+
+# Entrypoint
+CMD ["/root/usr/bin/run"]
