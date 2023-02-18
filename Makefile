@@ -20,6 +20,7 @@ test:
 .PHONY: test_build
 test_build:
 	go mod verify && go mod tidy
+	cd cmd/router && go build main.go && rm main
 	cd examples/service && go build main.go && rm main
 	cd examples/cli && go build cli.go && rm cli
 	cd examples/appengine && go build main.go && rm main
