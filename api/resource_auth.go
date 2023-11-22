@@ -11,7 +11,7 @@ import (
 	"github.com/txsvc/apikit/auth"
 	"github.com/txsvc/apikit/config"
 	"github.com/txsvc/apikit/helpers"
-	"github.com/txsvc/apikit/settings"
+	"github.com/txsvc/stdlib/v2/settings"
 )
 
 const (
@@ -49,10 +49,7 @@ func InitEndpoint(c echo.Context) error {
 	}
 
 	// pre-validate the request
-	if ds.Credentials == nil || ds.APIKey == "" {
-		return StandardResponse(c, http.StatusBadRequest, nil)
-	}
-	if ds.Credentials.ProjectID == "" || ds.Credentials.UserID == "" {
+	if ds.Credentials == nil || ds.Credentials.ProjectID == "" {
 		return StandardResponse(c, http.StatusBadRequest, nil)
 	}
 
@@ -65,15 +62,14 @@ func InitEndpoint(c echo.Context) error {
 	// prepare the settings for registration
 	cfg.Credentials.Token = CreateSimpleToken() // ignore anything that was provided
 	cfg.Credentials.Expires = stdlib.IncT(stdlib.Now(), LoginExpiresAfter)
-	cfg.APIKey = ds.APIKey
-	cfg.Status = settings.StateInit // signals init
+	cfg.Credentials.Status = settings.StateInit // signals init
 
 	if err := auth.RegisterAuthorization(&cfg); err != nil {
 		return StandardResponse(c, http.StatusBadRequest, nil) // FIXME: or 409/Conflict ?
 	}
 
 	// all good so far, send the confirmation
-	err := helpers.MailgunSimpleEmail("ops@txs.vc", cfg.Credentials.UserID, fmt.Sprintf("your api access credentials (%d)", stdlib.Now()), fmt.Sprintf("the token: %s\n", cfg.Credentials.Token))
+	err := helpers.MailgunSimpleEmail("ops@txs.vc", cfg.Credentials.ClientID, fmt.Sprintf("your api access credentials (%d)", stdlib.Now()), fmt.Sprintf("the token: %s\n", cfg.Credentials.Token))
 	if err != nil {
 		return StandardResponse(c, http.StatusBadRequest, nil)
 	}
@@ -85,7 +81,7 @@ func InitEndpoint(c echo.Context) error {
 func (c *Client) LoginCommand(token string) (*StatusObject, error) {
 	var so StatusObject
 
-	status, err := c.GET(fmt.Sprintf("%s%s/%s/%s", NamespacePrefix, InitRoute, signature(c.cfg.APIKey, token), token), &so)
+	status, err := c.GET(fmt.Sprintf("%s%s/%s/%s", NamespacePrefix, InitRoute, signature(c.cfg.Credentials.ClientID, token), token), &so)
 	if status != http.StatusOK || err != nil {
 		return nil, err
 	}
@@ -112,7 +108,7 @@ func LoginEndpoint(c echo.Context) error {
 	}
 
 	// compare provided signature with the expected signature
-	if sig != signature(ds.APIKey, ds.Credentials.Token) {
+	if sig != signature(ds.Credentials.ClientID, ds.Credentials.Token) {
 		return ErrorResponse(c, http.StatusBadRequest, config.ErrInitializingConfiguration, "invalid sig")
 	}
 
@@ -125,7 +121,7 @@ func LoginEndpoint(c echo.Context) error {
 	cfg := ds.Clone()           // clone, otherwise stupid things happen with pointers !
 	cfg.Credentials.Expires = 0 // FIXME: really never ?
 	cfg.Credentials.Token = CreateSimpleToken()
-	cfg.Status = settings.StateAuthorized
+	cfg.Credentials.Status = settings.StateAuthorized
 
 	// FIXME: what about scopes ?
 
@@ -144,7 +140,7 @@ func LoginEndpoint(c echo.Context) error {
 }
 
 func (c *Client) LogoutCommand() error {
-	_, err := c.DELETE(fmt.Sprintf("%s%s/%s", NamespacePrefix, InitRoute, signature(c.cfg.APIKey, c.cfg.Credentials.Token)), nil, nil)
+	_, err := c.DELETE(fmt.Sprintf("%s%s/%s", NamespacePrefix, InitRoute, signature(c.cfg.Credentials.ClientID, c.cfg.Credentials.Token)), nil, nil)
 	if err != nil {
 		return err
 	}
@@ -169,12 +165,12 @@ func LogoutEndpoint(c echo.Context) error {
 	}
 
 	// compare provided signature with the expected signature
-	if sig != signature(cfg.APIKey, cfg.Credentials.Token) {
+	if sig != signature(cfg.Credentials.ClientID, cfg.Credentials.Token) {
 		return ErrorResponse(c, http.StatusBadRequest, config.ErrInitializingConfiguration, "invalid sig")
 	}
 
 	// update the cache and store
-	cfg.Status = settings.StateUndefined // just set to invalid and expired
+	cfg.Credentials.Status = settings.StateUndefined // just set to invalid and expired
 	cfg.Credentials.Expires = stdlib.Now() - 1
 	if err := auth.UpdateStore(cfg); err != nil {
 		return ErrorResponse(c, http.StatusBadRequest, err, "update store")
@@ -183,9 +179,9 @@ func LogoutEndpoint(c echo.Context) error {
 	return StandardResponse(c, http.StatusOK, nil)
 }
 
-// signature returns a MD5(apiKey+token) as this is only known locally ...
-func signature(apiKey, token string) string {
-	return stdlib.Fingerprint(fmt.Sprintf("%s%s", apiKey, token))
+// signature returns a MD5(clientid+token) as this is only known locally ...
+func signature(clientid, token string) string {
+	return stdlib.Fingerprint(fmt.Sprintf("%s%s", clientid, token))
 }
 
 func CreateSimpleToken() string {

@@ -8,7 +8,7 @@ import (
 	"github.com/txsvc/stdlib/v2"
 
 	"github.com/txsvc/apikit/helpers"
-	"github.com/txsvc/apikit/settings"
+	"github.com/txsvc/stdlib/v2/settings"
 )
 
 type (
@@ -76,8 +76,8 @@ func (c *authCache) Register(ds *settings.DialSettings) error {
 
 	// check if the settings already exists
 	if a, ok := c.idToAuth[ds.Credentials.Key()]; ok {
-		if a.Status == settings.StateAuthorized { // FIXME this is weird, why?
-			_log.Errorf("already authorized. t=%s, state=%d", a.Credentials.Token, a.Status)
+		if a.Credentials.Status == settings.StateAuthorized { // FIXME this is weird, why?
+			_log.Errorf("already authorized. t=%s, state=%d", a.Credentials.Token, a.Credentials.Status)
 			return ErrAlreadyAuthorized
 		}
 

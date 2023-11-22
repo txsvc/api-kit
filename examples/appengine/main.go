@@ -16,7 +16,7 @@ import (
 	"github.com/txsvc/apikit/auth"
 	"github.com/txsvc/apikit/config"
 	"github.com/txsvc/apikit/helpers"
-	"github.com/txsvc/apikit/settings"
+	"github.com/txsvc/stdlib/v2/settings"
 )
 
 // the below version numbers should match the git release tags,

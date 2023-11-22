@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/txsvc/apikit/settings"
+	"github.com/txsvc/stdlib/v2/settings"
 )
 
 const testCredentialFile = "test.json"
@@ -17,7 +17,6 @@ func TestWriteReadSettings(t *testing.T) {
 		Scopes:        []string{"a", "b"},
 		DefaultScopes: []string{"A", "B"},
 		UserAgent:     "agent",
-		APIKey:        "api_key",
 	}
 	settings1.SetOption("FOO", "x")
 	settings1.SetOption("BAR", "x")
@@ -37,7 +36,7 @@ func TestWriteReadSettings(t *testing.T) {
 func TestWriteReadCredentials(t *testing.T) {
 	cred1 := &settings.Credentials{
 		ProjectID: "project",
-		UserID:    "user",
+		ClientID:  "client",
 		Token:     "token",
 		Expires:   42,
 	}

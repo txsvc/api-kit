@@ -13,7 +13,7 @@ require (
 	github.com/mailgun/mailgun-go/v4 v4.11.1
 	github.com/miguelmota/go-ethereum-hdwallet v0.1.1
 	github.com/stretchr/testify v1.8.4
-	github.com/txsvc/stdlib/v2 v2.5.0
+	github.com/txsvc/stdlib/v2 v2.6.0
 	github.com/urfave/cli/v2 v2.25.7
 	github.com/ziflex/lecho/v3 v3.5.0
 	golang.org/x/crypto v0.15.0
@@ -110,7 +110,7 @@ require (
 	github.com/quic-go/qtls-go1-20 v0.3.4 // indirect
 	github.com/quic-go/quic-go v0.39.0 // indirect
 	github.com/rs/xid v1.5.0 // indirect
-	github.com/rs/zerolog v1.29.1 // indirect
+	github.com/rs/zerolog v1.31.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/shopspring/decimal v1.2.0 // indirect
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
@@ -120,6 +120,7 @@ require (
 	github.com/smallstep/go-attestation v0.4.4-0.20230627102604-cf579e53cbd2 // indirect
 	github.com/smallstep/nosql v0.6.0 // indirect
 	github.com/smallstep/truststore v0.12.1 // indirect
+	github.com/smarty/assertions v1.15.1 // indirect
 	github.com/spf13/cast v1.4.1 // indirect
 	github.com/spf13/cobra v1.7.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect

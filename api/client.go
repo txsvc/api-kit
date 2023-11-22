@@ -11,7 +11,7 @@ import (
 
 	"github.com/txsvc/apikit/config"
 	"github.com/txsvc/apikit/logger"
-	"github.com/txsvc/apikit/settings"
+	"github.com/txsvc/stdlib/v2/settings"
 )
 
 const (

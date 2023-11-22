@@ -5,8 +5,8 @@ import (
 	"log"
 
 	"github.com/txsvc/apikit/helpers"
-	"github.com/txsvc/apikit/settings"
 	"github.com/txsvc/stdlib/v2"
+	"github.com/txsvc/stdlib/v2/settings"
 )
 
 const (

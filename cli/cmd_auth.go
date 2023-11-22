@@ -13,7 +13,7 @@ import (
 	"github.com/txsvc/apikit/config"
 	"github.com/txsvc/apikit/helpers"
 	"github.com/txsvc/apikit/logger"
-	"github.com/txsvc/apikit/settings"
+	"github.com/txsvc/stdlib/v2/settings"
 )
 
 func WithAuthCommands() []*cli.Command {
@@ -85,12 +85,12 @@ func InitCommand(c *cli.Context) error {
 
 	_apiKey := stdlib.Fingerprint(fmt.Sprintf("%s%s%s", config.GetConfig().Info().Name(), userid, mnemonic))
 
-	switch cfg.Status {
+	switch cfg.Credentials.Status {
 	case -1:
 		// set to INVALID
 		return config.ErrInvalidConfiguration
 	case 1:
-		if _apiKey == cfg.APIKey {
+		if _apiKey == cfg.GetOption("APIKey") {
 			// correct pass phrase was provided, reset the authentication
 			if err := cl.LogoutCommand(); err != nil {
 				return err // FIXME: better err or just pass on what comes?
@@ -105,12 +105,12 @@ func InitCommand(c *cli.Context) error {
 
 	cfg.Credentials = &settings.Credentials{
 		ProjectID: config.GetConfig().Info().Name(),
-		UserID:    userid,
+		ClientID:  userid,
 		Token:     api.CreateSimpleToken(),
 		Expires:   0, // FIXME: should this expire after some time?
 	}
-	cfg.Status = settings.StateInit
-	cfg.APIKey = _apiKey
+	cfg.Credentials.Status = settings.StateInit
+	cfg.SetOption("APIKey", _apiKey)
 	cfg.Scopes = make([]string, 0)
 	cfg.DefaultScopes = make([]string, 0)
 	cfg.Options = make(map[string]string)
@@ -129,7 +129,7 @@ func InitCommand(c *cli.Context) error {
 	}
 
 	if phrase == "" {
-		fmt.Printf("userid: %s\n", cfg.Credentials.UserID)
+		fmt.Printf("userid: %s\n", cfg.Credentials.ClientID)
 		fmt.Printf("passphrase: \"%s\"\n\n", mnemonic)
 		fmt.Println("Make a copy of the passphrase and keep it secure !")
 	}
@@ -163,7 +163,7 @@ func LoginCommand(c *cli.Context) error {
 
 	// update the local config
 	cfg.Credentials.Token = status.Message
-	cfg.Status = settings.StateAuthorized // LOGGED_IN
+	cfg.Credentials.Status = settings.StateAuthorized // LOGGED_IN
 	if !cfg.Credentials.IsValid() {
 		return config.ErrInvalidConfiguration
 	}
@@ -201,7 +201,7 @@ func LogoutCommand(c *cli.Context) error {
 
 	// update the local config
 	cfg.Credentials.Expires = stdlib.Now() - 1
-	cfg.Status = settings.StateUndefined // LOGGED_OUT
+	cfg.Credentials.Status = settings.StateUndefined // LOGGED_OUT
 
 	pathToFile := filepath.Join(config.GetConfig().ConfigLocation(), config.DefaultConfigName)
 	if err := helpers.WriteDialSettings(cfg, pathToFile); err != nil {
