@@ -81,7 +81,7 @@ func InitEndpoint(c echo.Context) error {
 func (c *Client) LoginCommand(token string) (*StatusObject, error) {
 	var so StatusObject
 
-	status, err := c.GET(fmt.Sprintf("%s%s/%s/%s", NamespacePrefix, InitRoute, signature(c.cfg.Credentials.ClientID, token), token), &so)
+	status, err := c.GET(fmt.Sprintf("%s%s/%s/%s", NamespacePrefix, InitRoute, signature(c.ds.Credentials.ClientID, token), token), &so)
 	if status != http.StatusOK || err != nil {
 		return nil, err
 	}
@@ -140,7 +140,7 @@ func LoginEndpoint(c echo.Context) error {
 }
 
 func (c *Client) LogoutCommand() error {
-	_, err := c.DELETE(fmt.Sprintf("%s%s/%s", NamespacePrefix, InitRoute, signature(c.cfg.Credentials.ClientID, c.cfg.Credentials.Token)), nil, nil)
+	_, err := c.DELETE(fmt.Sprintf("%s%s/%s", NamespacePrefix, InitRoute, signature(c.ds.Credentials.ClientID, c.ds.Credentials.Token)), nil, nil)
 	if err != nil {
 		return err
 	}

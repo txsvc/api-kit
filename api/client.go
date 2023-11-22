@@ -34,7 +34,7 @@ var (
 type (
 	Client struct {
 		httpClient *http.Client
-		cfg        *settings.DialSettings // FIXME rename, it's stupid
+		ds         *settings.DialSettings
 		logger     logger.Logger
 		trace      string
 	}
@@ -58,7 +58,7 @@ func NewClient(ds *settings.DialSettings, logger logger.Logger) *Client {
 
 	return &Client{
 		httpClient: httpClient,
-		cfg:        _ds,
+		ds:         _ds,
 		logger:     logger,
 		trace:      stdlib.GetString(config.ForceTraceENV, ""),
 	}
@@ -66,19 +66,19 @@ func NewClient(ds *settings.DialSettings, logger logger.Logger) *Client {
 
 // GET is used to request data from the API. No payload, only queries!
 func (c *Client) GET(uri string, response interface{}) (int, error) {
-	return c.request("GET", fmt.Sprintf("%s%s", c.cfg.Endpoint, uri), nil, response)
+	return c.request("GET", fmt.Sprintf("%s%s", c.ds.Endpoint, uri), nil, response)
 }
 
 func (c *Client) POST(uri string, request, response interface{}) (int, error) {
-	return c.request("POST", fmt.Sprintf("%s%s", c.cfg.Endpoint, uri), request, response)
+	return c.request("POST", fmt.Sprintf("%s%s", c.ds.Endpoint, uri), request, response)
 }
 
 func (c *Client) PUT(uri string, request, response interface{}) (int, error) {
-	return c.request("PUT", fmt.Sprintf("%s%s", c.cfg.Endpoint, uri), request, response)
+	return c.request("PUT", fmt.Sprintf("%s%s", c.ds.Endpoint, uri), request, response)
 }
 
 func (c *Client) DELETE(uri string, request, response interface{}) (int, error) {
-	return c.request("DELETE", fmt.Sprintf("%s%s", c.cfg.Endpoint, uri), request, response)
+	return c.request("DELETE", fmt.Sprintf("%s%s", c.ds.Endpoint, uri), request, response)
 }
 
 func (c *Client) request(method, url string, request, response interface{}) (int, error) {
@@ -108,9 +108,9 @@ func (c *Client) request(method, url string, request, response interface{}) (int
 func (c *Client) roundTrip(req *http.Request, response interface{}) (int, error) {
 
 	req.Header.Set("Content-Type", "application/json; charset=utf-8")
-	req.Header.Set("User-Agent", c.cfg.UserAgent)
-	if c.cfg.Credentials.Token != "" {
-		req.Header.Set("Authorization", "Bearer "+c.cfg.Credentials.Token)
+	req.Header.Set("User-Agent", c.ds.UserAgent)
+	if c.ds.Credentials.Token != "" {
+		req.Header.Set("Authorization", "Bearer "+c.ds.Credentials.Token)
 	}
 	if c.trace != "" {
 		req.Header.Set("X-Request-ID", c.trace)
