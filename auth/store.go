@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"sync"
@@ -8,6 +9,7 @@ import (
 	"github.com/txsvc/stdlib/v2"
 
 	"github.com/txsvc/cloudlib/helpers"
+	"github.com/txsvc/cloudlib/observer"
 	"github.com/txsvc/cloudlib/settings"
 )
 
@@ -29,7 +31,7 @@ func FlushAuthorizations(root string) {
 	mu.Lock()
 	defer mu.Unlock()
 
-	_log.Debugf("flushing auth cache. root=%s", root)
+	observer.LogWithLevel(observer.LevelDebug, fmt.Sprintf("flushing auth cache. root=%s", root))
 
 	cache = &authCache{
 		root:        root,
@@ -72,12 +74,12 @@ func UpdateStore(ds *settings.DialSettings) error {
 
 func (c *authCache) Register(ds *settings.DialSettings) error {
 
-	_log.Debugf("register. t=%s/%s", ds.Credentials.Token, fileName(ds.Credentials))
+	observer.LogWithLevel(observer.LevelDebug, fmt.Sprintf("register. t=%s/%s", ds.Credentials.Token, fileName(ds.Credentials)))
 
 	// check if the settings already exists
 	if a, ok := c.idToAuth[ds.Credentials.Key()]; ok {
 		if a.Credentials.Status == settings.StateAuthorized { // FIXME this is weird, why?
-			_log.Errorf("already authorized. t=%s, state=%d", a.Credentials.Token, a.Credentials.Status)
+			_ = observer.ReportError(fmt.Errorf("already authorized. t=%s, state=%d", a.Credentials.Token, a.Credentials.Status))
 			return ErrAlreadyAuthorized
 		}
 
@@ -101,7 +103,7 @@ func (c *authCache) Register(ds *settings.DialSettings) error {
 }
 
 func (c *authCache) LookupByToken(token string) (*settings.DialSettings, error) {
-	_log.Debugf("lookup. t=%s", token)
+	observer.LogWithLevel(observer.LevelDebug, fmt.Sprintf("lookup. t=%s", token))
 
 	if token == "" {
 		return nil, ErrNoToken

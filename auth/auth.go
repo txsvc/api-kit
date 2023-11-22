@@ -8,7 +8,6 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"github.com/txsvc/cloudlib/logger"
 	"github.com/txsvc/cloudlib/settings"
 )
 
@@ -41,14 +40,9 @@ var (
 
 	// ErrNoScope indicates that no scope was provided
 	ErrNoScope = errors.New("no scope provided")
-
-	// logger for this package
-	_log logger.Logger
 )
 
 func init() {
-	_log = logger.New()
-
 	// just empty maps to avoid any NPEs
 	FlushAuthorizations("")
 }
