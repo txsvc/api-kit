@@ -10,8 +10,8 @@ import (
 	"github.com/txsvc/stdlib/v2"
 
 	"github.com/txsvc/apikit/config"
-	"github.com/txsvc/apikit/logger"
-	"github.com/txsvc/stdlib/v2/settings"
+	"github.com/txsvc/cloudlib/logger"
+	"github.com/txsvc/cloudlib/settings"
 )
 
 const (

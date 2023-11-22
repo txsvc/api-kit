@@ -7,8 +7,8 @@ import (
 
 	"github.com/txsvc/stdlib/v2"
 
-	"github.com/txsvc/apikit/helpers"
-	"github.com/txsvc/stdlib/v2/settings"
+	"github.com/txsvc/cloudlib/helpers"
+	"github.com/txsvc/cloudlib/settings"
 )
 
 type (
@@ -38,7 +38,7 @@ func FlushAuthorizations(root string) {
 	}
 
 	if root != "" {
-		filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+		_ = filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 			if info == nil {
 				return nil
 			}
@@ -48,7 +48,7 @@ func FlushAuthorizations(root string) {
 				if err != nil {
 					return err // FIXME: this is never checked on exit !
 				}
-				cache.Register(cfg)
+				_ = cache.Register(cfg)
 			}
 			return nil
 		})

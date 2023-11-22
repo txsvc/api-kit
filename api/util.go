@@ -93,7 +93,9 @@ func HandleFileUpload(ctx context.Context, req *http.Request, location, formName
 		if part.FormName() == formName {
 			path = filepath.Join(location, part.FileName())
 
-			os.MkdirAll(filepath.Dir(path), os.ModePerm) // make sure sub-folders exist
+			if err := os.MkdirAll(filepath.Dir(path), os.ModePerm); err != nil { // make sure sub-folders exist
+				return "", err
+			}
 			out, err := os.Create(path)
 			if err != nil {
 				return "", err

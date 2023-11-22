@@ -11,9 +11,9 @@ import (
 	"github.com/txsvc/apikit/api"
 	"github.com/txsvc/apikit/auth"
 	"github.com/txsvc/apikit/config"
-	"github.com/txsvc/apikit/helpers"
-	"github.com/txsvc/apikit/logger"
-	"github.com/txsvc/stdlib/v2/settings"
+	"github.com/txsvc/cloudlib/helpers"
+	"github.com/txsvc/cloudlib/logger"
+	"github.com/txsvc/cloudlib/settings"
 )
 
 func WithAuthCommands() []*cli.Command {

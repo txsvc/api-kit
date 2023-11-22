@@ -11,7 +11,7 @@ import (
 	"github.com/txsvc/apikit/api"
 	kit "github.com/txsvc/apikit/cli"
 	"github.com/txsvc/apikit/config"
-	"github.com/txsvc/apikit/logger"
+	"github.com/txsvc/cloudlib/logger"
 )
 
 func init() {

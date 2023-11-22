@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/txsvc/apikit"
-	"github.com/txsvc/apikit/logger"
+	"github.com/txsvc/cloudlib/logger"
 )
 
 func TestNewClient(t *testing.T) {

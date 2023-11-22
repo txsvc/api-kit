@@ -9,7 +9,7 @@ import (
 
 	"github.com/PuerkitoBio/rehttp"
 
-	"github.com/txsvc/apikit/logger"
+	"github.com/txsvc/cloudlib/logger"
 )
 
 type (

@@ -4,9 +4,9 @@ import (
 	"errors"
 	"log"
 
-	"github.com/txsvc/apikit/helpers"
+	"github.com/txsvc/cloudlib/helpers"
+	"github.com/txsvc/cloudlib/settings"
 	"github.com/txsvc/stdlib/v2"
-	"github.com/txsvc/stdlib/v2/settings"
 )
 
 const (
@@ -15,12 +15,12 @@ const (
 	AppSessionKeyENV     = "APP_SESSION_KEY" // Session/Auth key used to encrypt cookies with
 
 	APIEndpointENV = "API_ENDPOINT" // client settings
-	ForceTraceENV  = "APIKIT_FORCE_TRACE"
+	ForceTraceENV  = "API_FORCE_TRACE"
 
 	// Other constants
 	DefaultConfigName          = "config"
 	DefaultConfigLocation      = "./.config"
-	DefaultCredentialsLocation = "cred"
+	DefaultCredentialsLocation = "./.secrets"
 	DefaultEndpoint            = "http://localhost:8080" // only really useful for testing ...
 )
 
