@@ -5,11 +5,11 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/txsvc/cloudlib/helpers"
+	"github.com/txsvc/cloudlib/settings"
 	"github.com/txsvc/stdlib/v2"
 
 	"github.com/txsvc/apikit/auth"
-	"github.com/txsvc/apikit/helpers"
-	"github.com/txsvc/apikit/settings"
 )
 
 // the below version numbers should match the git release tags,
@@ -106,10 +106,12 @@ func (c *localConfig) Settings() *settings.DialSettings {
 }
 
 func (c *localConfig) defaultSettings() *settings.DialSettings {
+
 	return &settings.DialSettings{
 		Endpoint:      DefaultEndpoint,
-		DefaultScopes: defaultScopes(),
 		Credentials:   &settings.Credentials{}, // add this to avoid NPEs further down
+		DefaultScopes: defaultScopes(),
+		UserAgent:     c.info.UserAgentString(),
 	}
 }
 

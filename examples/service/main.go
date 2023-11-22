@@ -12,11 +12,12 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
+	"github.com/txsvc/cloudlib/helpers"
+
 	"github.com/txsvc/apikit"
 	"github.com/txsvc/apikit/api"
 	"github.com/txsvc/apikit/auth"
 	"github.com/txsvc/apikit/config"
-	"github.com/txsvc/apikit/helpers"
 )
 
 func init() {
@@ -34,10 +35,6 @@ func init() {
 		// save the new configuration
 		helpers.WriteDialSettings(cfg, path)
 	}
-
-	// initialize the credentials store
-	root := filepath.Join(config.GetConfig().ConfigLocation(), config.DefaultCredentialsLocation)
-	auth.FlushAuthorizations(root)
 }
 
 func main() {

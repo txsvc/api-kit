@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"os"
 	"testing"
 	"time"
 
@@ -12,21 +11,17 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/txsvc/apikit"
-	"github.com/txsvc/apikit/logger"
 )
 
 func TestNewClient(t *testing.T) {
 
-	cl, err := NewClient(nil, logger.NewLogger(os.Stdout, "debug"))
-
-	assert.NoError(t, err)
+	cl := NewClient(nil)
 	assert.NotNil(t, cl)
 }
 
 func TestClientGET(t *testing.T) {
 
-	cl, err := NewClient(nil, logger.NewLogger(os.Stdout, "debug"))
-	assert.NoError(t, err)
+	cl := NewClient(nil)
 	assert.NotNil(t, cl)
 
 	// http setup

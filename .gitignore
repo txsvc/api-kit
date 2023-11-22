@@ -15,6 +15,7 @@ coverage.txt
 /hack/
 bin/
 stuff.md
+lint.txt
 
 # Test binary, built with `go test -c`
 *.test

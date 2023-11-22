@@ -15,8 +15,8 @@ import (
 	"github.com/txsvc/apikit/api"
 	"github.com/txsvc/apikit/auth"
 	"github.com/txsvc/apikit/config"
-	"github.com/txsvc/apikit/helpers"
-	"github.com/txsvc/apikit/settings"
+	"github.com/txsvc/cloudlib/helpers"
+	"github.com/txsvc/cloudlib/settings"
 )
 
 // the below version numbers should match the git release tags,
@@ -59,7 +59,7 @@ func NewAppEngineConfigProvider() config.ConfigProvider {
 
 func init() {
 	// initialize the config provider
-	config.SetProvider(NewAppEngineConfigProvider())
+	config.SetProvider(config.NewLocalConfigProvider())
 
 	// create a default configuration for the service (if none exists)
 	path := filepath.Join(config.GetConfig().ConfigLocation(), config.DefaultConfigName)
@@ -72,9 +72,6 @@ func init() {
 		// save the new configuration
 		helpers.WriteDialSettings(cfg, path)
 	}
-
-	// FIXME: this is a duplicate, auth.init() already does this. Should initialize the auth provider instead
-	auth.FlushAuthorizations("")
 }
 
 func main() {
@@ -84,7 +81,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Do not use AutoTLS here as TLS termination is handled by App Engine.
+	// Do not use AutoTLS here as TLS termination is handled by Google App Engine.
 	// Do not change default port 8080 !
 	svc.Listen("")
 }
@@ -98,6 +95,7 @@ func setup() *echo.Echo {
 	e.Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
 
 	// add your endpoints here
+	e.GET("/", api.DefaultEndpoint)
 	e.GET("/ping", pingEndpoint)
 
 	// done

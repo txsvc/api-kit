@@ -13,7 +13,7 @@ import (
 	"golang.org/x/crypto/acme/autocert"
 
 	"github.com/txsvc/stdlib/v2"
-	"github.com/txsvc/stdlib/v2/stdlibx/stringsx"
+	"github.com/txsvc/stdlib/v2/deprecated/stringsx"
 
 	"github.com/txsvc/apikit/config"
 )

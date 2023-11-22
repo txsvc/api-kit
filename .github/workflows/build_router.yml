@@ -2,12 +2,12 @@ name: build_router
 
 on:
   push:
-    branches: [develop]
+    branches: [main]
 
 env:
   CONTEXT_DIR: cmd/router
   CONTAINER_IMAGE: router
-  CONTAINER_VERSION: 0.1.0
+  CONTAINER_VERSION: 0.2.2
   REPOSITORY: ${{ secrets.REPOSITORY }}
   REPOSITORY_HOST: ${{ secrets.REPOSITORY_HOST }}
   GITHUB_SHA: ${{ github.sha }}

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"sort"
@@ -10,7 +11,7 @@ import (
 	"github.com/txsvc/apikit/api"
 	kit "github.com/txsvc/apikit/cli"
 	"github.com/txsvc/apikit/config"
-	"github.com/txsvc/apikit/logger"
+	"github.com/txsvc/cloudlib/observer"
 )
 
 func init() {
@@ -82,20 +83,18 @@ func setupFlags() []cli.Flag {
 
 func PingCmd(c *cli.Context) error {
 
-	logger := logger.New()
-
-	cl, err := api.NewClient(nil, logger)
-	if err != nil {
-		return err
+	cl := api.NewClient(nil)
+	if cl == nil {
+		return fmt.Errorf("could not create a client instance")
 	}
 
 	var so api.StatusObject
 	if status, err := cl.GET("/ping", &so); err != nil {
-		logger.Errorf("status: %d: %s", status, err)
+		observer.LogWithLevel(observer.LevelError, fmt.Sprintf("status: %d: %s", status, err))
 		return nil
 	}
 
-	logger.Infof("%v\n", so)
+	observer.Log(fmt.Sprintf("%v\n", so))
 
 	return nil
 }

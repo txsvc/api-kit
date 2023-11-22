@@ -7,11 +7,10 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/txsvc/cloudlib/settings"
 	"github.com/txsvc/stdlib/v2"
 
 	"github.com/txsvc/apikit/config"
-	"github.com/txsvc/apikit/logger"
-	"github.com/txsvc/apikit/settings"
 )
 
 const (
@@ -34,17 +33,15 @@ var (
 type (
 	Client struct {
 		httpClient *http.Client
-		cfg        *settings.DialSettings
-		logger     logger.Logger
-		userAgent  string
+		ds         *settings.DialSettings
 		trace      string
 	}
 )
 
-func NewClient(ds *settings.DialSettings, logger logger.Logger) (*Client, error) {
+func NewClient(ds *settings.DialSettings) *Client {
 	var _ds *settings.DialSettings
 
-	httpClient := NewTransport(logger, http.DefaultTransport)
+	httpClient := NewTransport(http.DefaultTransport)
 
 	// create or clone the settings
 	if ds != nil {
@@ -59,28 +56,26 @@ func NewClient(ds *settings.DialSettings, logger logger.Logger) (*Client, error)
 
 	return &Client{
 		httpClient: httpClient,
-		cfg:        _ds,
-		logger:     logger,
-		userAgent:  config.GetConfig().Info().UserAgentString(),
+		ds:         _ds,
 		trace:      stdlib.GetString(config.ForceTraceENV, ""),
-	}, nil // FIXME: nothing creates an error here, remove later?
+	}
 }
 
 // GET is used to request data from the API. No payload, only queries!
 func (c *Client) GET(uri string, response interface{}) (int, error) {
-	return c.request("GET", fmt.Sprintf("%s%s", c.cfg.Endpoint, uri), nil, response)
+	return c.request("GET", fmt.Sprintf("%s%s", c.ds.Endpoint, uri), nil, response)
 }
 
 func (c *Client) POST(uri string, request, response interface{}) (int, error) {
-	return c.request("POST", fmt.Sprintf("%s%s", c.cfg.Endpoint, uri), request, response)
+	return c.request("POST", fmt.Sprintf("%s%s", c.ds.Endpoint, uri), request, response)
 }
 
 func (c *Client) PUT(uri string, request, response interface{}) (int, error) {
-	return c.request("PUT", fmt.Sprintf("%s%s", c.cfg.Endpoint, uri), request, response)
+	return c.request("PUT", fmt.Sprintf("%s%s", c.ds.Endpoint, uri), request, response)
 }
 
 func (c *Client) DELETE(uri string, request, response interface{}) (int, error) {
-	return c.request("DELETE", fmt.Sprintf("%s%s", c.cfg.Endpoint, uri), request, response)
+	return c.request("DELETE", fmt.Sprintf("%s%s", c.ds.Endpoint, uri), request, response)
 }
 
 func (c *Client) request(method, url string, request, response interface{}) (int, error) {
@@ -110,9 +105,9 @@ func (c *Client) request(method, url string, request, response interface{}) (int
 func (c *Client) roundTrip(req *http.Request, response interface{}) (int, error) {
 
 	req.Header.Set("Content-Type", "application/json; charset=utf-8")
-	req.Header.Set("User-Agent", c.userAgent)
-	if c.cfg.Credentials.Token != "" {
-		req.Header.Set("Authorization", "Bearer "+c.cfg.Credentials.Token)
+	req.Header.Set("User-Agent", c.ds.UserAgent)
+	if c.ds.Credentials.Token != "" {
+		req.Header.Set("Authorization", "Bearer "+c.ds.Credentials.Token)
 	}
 	if c.trace != "" {
 		req.Header.Set("X-Request-ID", c.trace)
@@ -133,6 +128,8 @@ func (c *Client) roundTrip(req *http.Request, response interface{}) (int, error)
 	// anything other than OK, Created, Accepted, NoContent is treated as an error
 	if resp.StatusCode > http.StatusNoContent {
 		if response != nil {
+			// FIXME make this more generic, not all API calls return a status object!
+
 			// as we expect a response, there might be a StatusObject
 			status := StatusObject{}
 			err = json.NewDecoder(resp.Body).Decode(&status)

@@ -6,14 +6,13 @@ import (
 
 	"github.com/urfave/cli/v2"
 
+	"github.com/txsvc/cloudlib/helpers"
+	"github.com/txsvc/cloudlib/settings"
 	"github.com/txsvc/stdlib/v2"
 
 	"github.com/txsvc/apikit/api"
 	"github.com/txsvc/apikit/auth"
 	"github.com/txsvc/apikit/config"
-	"github.com/txsvc/apikit/helpers"
-	"github.com/txsvc/apikit/logger"
-	"github.com/txsvc/apikit/settings"
 )
 
 func WithAuthCommands() []*cli.Command {
@@ -74,9 +73,9 @@ func InitCommand(c *cli.Context) error {
 	cfg := config.GetConfig().Settings()
 
 	// get a client instance
-	cl, err := api.NewClient(cfg, logger.New())
-	if err != nil {
-		return err // FIXME: better err or just pass on what comes?
+	cl := api.NewClient(cfg)
+	if cl == nil {
+		return fmt.Errorf("could not create client")
 	}
 
 	// if a passphrase was provided and the fingerprint(realm,userid,phrase) matches the API key,
@@ -85,12 +84,12 @@ func InitCommand(c *cli.Context) error {
 
 	_apiKey := stdlib.Fingerprint(fmt.Sprintf("%s%s%s", config.GetConfig().Info().Name(), userid, mnemonic))
 
-	switch cfg.Status {
+	switch cfg.Credentials.Status {
 	case -1:
 		// set to INVALID
 		return config.ErrInvalidConfiguration
 	case 1:
-		if _apiKey == cfg.APIKey {
+		if _apiKey == cfg.GetOption("APIKey") {
 			// correct pass phrase was provided, reset the authentication
 			if err := cl.LogoutCommand(); err != nil {
 				return err // FIXME: better err or just pass on what comes?
@@ -105,12 +104,12 @@ func InitCommand(c *cli.Context) error {
 
 	cfg.Credentials = &settings.Credentials{
 		ProjectID: config.GetConfig().Info().Name(),
-		UserID:    userid,
+		ClientID:  userid,
 		Token:     api.CreateSimpleToken(),
 		Expires:   0, // FIXME: should this expire after some time?
 	}
-	cfg.Status = settings.StateInit
-	cfg.APIKey = _apiKey
+	cfg.Credentials.Status = settings.StateInit
+	cfg.SetOption("APIKey", _apiKey)
 	cfg.Scopes = make([]string, 0)
 	cfg.DefaultScopes = make([]string, 0)
 	cfg.Options = make(map[string]string)
@@ -129,7 +128,7 @@ func InitCommand(c *cli.Context) error {
 	}
 
 	if phrase == "" {
-		fmt.Printf("userid: %s\n", cfg.Credentials.UserID)
+		fmt.Printf("userid: %s\n", cfg.Credentials.ClientID)
 		fmt.Printf("passphrase: \"%s\"\n\n", mnemonic)
 		fmt.Println("Make a copy of the passphrase and keep it secure !")
 	}
@@ -151,10 +150,11 @@ func LoginCommand(c *cli.Context) error {
 	}
 
 	// now start the auth login process with the API
-	cl, err := api.NewClient(cfg, logger.New())
-	if err != nil {
-		return err // FIXME: better err or just pass on what comes?
+	cl := api.NewClient(cfg)
+	if cl == nil {
+		return fmt.Errorf("could not create client")
 	}
+
 	status, err := cl.LoginCommand(token)
 	if err != nil {
 		return err // FIXME: better err or just pass on what comes?
@@ -162,7 +162,7 @@ func LoginCommand(c *cli.Context) error {
 
 	// update the local config
 	cfg.Credentials.Token = status.Message
-	cfg.Status = settings.StateAuthorized // LOGGED_IN
+	cfg.Credentials.Status = settings.StateAuthorized // LOGGED_IN
 	if !cfg.Credentials.IsValid() {
 		return config.ErrInvalidConfiguration
 	}
@@ -189,18 +189,18 @@ func LogoutCommand(c *cli.Context) error {
 	}
 
 	// now start the auth logout process with the API
-	cl, err := api.NewClient(cfg, logger.New())
-	if err != nil {
-		return err // FIXME: better err or just pass on what comes?
+	cl := api.NewClient(cfg)
+	if cl == nil {
+		return fmt.Errorf("could not create client")
 	}
-	err = cl.LogoutCommand()
+	err := cl.LogoutCommand()
 	if err != nil {
 		return err // FIXME: better err or just pass on what comes?
 	}
 
 	// update the local config
 	cfg.Credentials.Expires = stdlib.Now() - 1
-	cfg.Status = settings.StateUndefined // LOGGED_OUT
+	cfg.Credentials.Status = settings.StateUndefined // LOGGED_OUT
 
 	pathToFile := filepath.Join(config.GetConfig().ConfigLocation(), config.DefaultConfigName)
 	if err := helpers.WriteDialSettings(cfg, pathToFile); err != nil {

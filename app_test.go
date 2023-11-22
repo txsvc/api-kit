@@ -23,6 +23,7 @@ func noopShutdown(ctx context.Context, a *App) error {
 	return nil
 }
 
+/*
 func timeoutShutdown(ctx context.Context, a *App) error {
 	fmt.Println("shutting down blocking ...")
 
@@ -33,6 +34,7 @@ func timeoutShutdown(ctx context.Context, a *App) error {
 
 	//return nil
 }
+*/
 
 func TestNewSimple(t *testing.T) {
 	svc, err := New(simpleSetup, noopShutdown)
@@ -68,6 +70,7 @@ func TestRunStop(t *testing.T) {
 	// do NOT call svc.Stop() as it somehow does an os.Exit(1) thingie ...
 }
 
+/*
 // FIXME: the timeout thing doesn't work
 func _TestRunStopTimeout(t *testing.T) {
 	svc, err := New(simpleSetup, timeoutShutdown)
@@ -87,3 +90,4 @@ func _TestRunStopTimeout(t *testing.T) {
 
 	time.Sleep(10 * time.Second)
 }
+*/
