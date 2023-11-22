@@ -106,10 +106,12 @@ func (c *localConfig) Settings() *settings.DialSettings {
 }
 
 func (c *localConfig) defaultSettings() *settings.DialSettings {
+
 	return &settings.DialSettings{
 		Endpoint:      DefaultEndpoint,
-		DefaultScopes: defaultScopes(),
 		Credentials:   &settings.Credentials{}, // add this to avoid NPEs further down
+		DefaultScopes: defaultScopes(),
+		UserAgent:     c.info.UserAgentString(),
 	}
 }
 

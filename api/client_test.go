@@ -17,16 +17,13 @@ import (
 
 func TestNewClient(t *testing.T) {
 
-	cl, err := NewClient(nil, logger.NewLogger(os.Stdout, "debug"))
-
-	assert.NoError(t, err)
+	cl := NewClient(nil, logger.NewLogger(os.Stdout, "debug"))
 	assert.NotNil(t, cl)
 }
 
 func TestClientGET(t *testing.T) {
 
-	cl, err := NewClient(nil, logger.NewLogger(os.Stdout, "debug"))
-	assert.NoError(t, err)
+	cl := NewClient(nil, logger.NewLogger(os.Stdout, "debug"))
 	assert.NotNil(t, cl)
 
 	// http setup

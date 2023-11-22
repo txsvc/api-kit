@@ -76,7 +76,7 @@ func (c *authCache) Register(ds *settings.DialSettings) error {
 
 	// check if the settings already exists
 	if a, ok := c.idToAuth[ds.Credentials.Key()]; ok {
-		if a.Status == settings.StateAuthorized {
+		if a.Status == settings.StateAuthorized { // FIXME this is weird, why?
 			_log.Errorf("already authorized. t=%s, state=%d", a.Credentials.Token, a.Status)
 			return ErrAlreadyAuthorized
 		}

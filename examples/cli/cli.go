@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"sort"
@@ -84,9 +85,9 @@ func PingCmd(c *cli.Context) error {
 
 	logger := logger.New()
 
-	cl, err := api.NewClient(nil, logger)
-	if err != nil {
-		return err
+	cl := api.NewClient(nil, logger)
+	if cl == nil {
+		return fmt.Errorf("could not create a client instance")
 	}
 
 	var so api.StatusObject

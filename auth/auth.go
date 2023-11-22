@@ -13,8 +13,10 @@ import (
 )
 
 const (
+	// anonymous
+	ScopeAnonymous = "api:anonymous" // this basically means that the Client is unknown
 	// default API scopes
-	ScopeApiRead   = "api:read" // that's the very minimum
+	ScopeApiRead   = "api:read" // that's the very minimum for a proper client
 	ScopeApiWrite  = "api:write"
 	ScopeApiEdit   = "api:edit"
 	ScopeApiCreate = "api:create"

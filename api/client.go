@@ -34,14 +34,13 @@ var (
 type (
 	Client struct {
 		httpClient *http.Client
-		cfg        *settings.DialSettings
+		cfg        *settings.DialSettings // FIXME rename, it's stupid
 		logger     logger.Logger
-		userAgent  string
 		trace      string
 	}
 )
 
-func NewClient(ds *settings.DialSettings, logger logger.Logger) (*Client, error) {
+func NewClient(ds *settings.DialSettings, logger logger.Logger) *Client {
 	var _ds *settings.DialSettings
 
 	httpClient := NewTransport(logger, http.DefaultTransport)
@@ -61,9 +60,8 @@ func NewClient(ds *settings.DialSettings, logger logger.Logger) (*Client, error)
 		httpClient: httpClient,
 		cfg:        _ds,
 		logger:     logger,
-		userAgent:  config.GetConfig().Info().UserAgentString(),
 		trace:      stdlib.GetString(config.ForceTraceENV, ""),
-	}, nil // FIXME: nothing creates an error here, remove later?
+	}
 }
 
 // GET is used to request data from the API. No payload, only queries!
@@ -110,7 +108,7 @@ func (c *Client) request(method, url string, request, response interface{}) (int
 func (c *Client) roundTrip(req *http.Request, response interface{}) (int, error) {
 
 	req.Header.Set("Content-Type", "application/json; charset=utf-8")
-	req.Header.Set("User-Agent", c.userAgent)
+	req.Header.Set("User-Agent", c.cfg.UserAgent)
 	if c.cfg.Credentials.Token != "" {
 		req.Header.Set("Authorization", "Bearer "+c.cfg.Credentials.Token)
 	}
@@ -133,6 +131,8 @@ func (c *Client) roundTrip(req *http.Request, response interface{}) (int, error)
 	// anything other than OK, Created, Accepted, NoContent is treated as an error
 	if resp.StatusCode > http.StatusNoContent {
 		if response != nil {
+			// FIXME make this more generic, not all API calls return a status object!
+
 			// as we expect a response, there might be a StatusObject
 			status := StatusObject{}
 			err = json.NewDecoder(resp.Body).Decode(&status)

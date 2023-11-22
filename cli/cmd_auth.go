@@ -74,9 +74,9 @@ func InitCommand(c *cli.Context) error {
 	cfg := config.GetConfig().Settings()
 
 	// get a client instance
-	cl, err := api.NewClient(cfg, logger.New())
-	if err != nil {
-		return err // FIXME: better err or just pass on what comes?
+	cl := api.NewClient(cfg, logger.New())
+	if cl == nil {
+		return fmt.Errorf("could not create client")
 	}
 
 	// if a passphrase was provided and the fingerprint(realm,userid,phrase) matches the API key,
@@ -151,10 +151,11 @@ func LoginCommand(c *cli.Context) error {
 	}
 
 	// now start the auth login process with the API
-	cl, err := api.NewClient(cfg, logger.New())
-	if err != nil {
-		return err // FIXME: better err or just pass on what comes?
+	cl := api.NewClient(cfg, logger.New())
+	if cl == nil {
+		return fmt.Errorf("could not create client")
 	}
+
 	status, err := cl.LoginCommand(token)
 	if err != nil {
 		return err // FIXME: better err or just pass on what comes?
@@ -189,11 +190,11 @@ func LogoutCommand(c *cli.Context) error {
 	}
 
 	// now start the auth logout process with the API
-	cl, err := api.NewClient(cfg, logger.New())
-	if err != nil {
-		return err // FIXME: better err or just pass on what comes?
+	cl := api.NewClient(cfg, logger.New())
+	if cl == nil {
+		return fmt.Errorf("could not create client")
 	}
-	err = cl.LogoutCommand()
+	err := cl.LogoutCommand()
 	if err != nil {
 		return err // FIXME: better err or just pass on what comes?
 	}
