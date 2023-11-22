@@ -64,7 +64,7 @@ func InitEndpoint(c echo.Context) error {
 	cfg.Credentials.Expires = stdlib.IncT(stdlib.Now(), LoginExpiresAfter)
 	cfg.Credentials.Status = settings.StateInit // signals init
 
-	if err := auth.RegisterAuthorization(&cfg); err != nil {
+	if err := auth.UpdateStore(&cfg); err != nil {
 		return StandardResponse(c, http.StatusBadRequest, nil) // FIXME: or 409/Conflict ?
 	}
 
@@ -125,7 +125,7 @@ func LoginEndpoint(c echo.Context) error {
 
 	// FIXME: what about scopes ?
 
-	if err := auth.RegisterAuthorization(&cfg); err != nil {
+	if err := auth.UpdateStore(&cfg); err != nil {
 		fmt.Println(err)
 		return ErrorResponse(c, http.StatusBadRequest, config.ErrInitializingConfiguration, "can't register")
 	}

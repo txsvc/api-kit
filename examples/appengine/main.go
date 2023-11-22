@@ -72,10 +72,6 @@ func init() {
 		// save the new configuration
 		helpers.WriteDialSettings(cfg, path)
 	}
-
-	// initialize the credentials store
-	root := filepath.Join(config.GetConfig().ConfigLocation(), config.DefaultCredentialsLocation)
-	auth.FlushAuthorizations(root)
 }
 
 func main() {

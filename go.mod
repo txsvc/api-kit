@@ -8,7 +8,7 @@ require (
 	github.com/labstack/echo/v4 v4.11.3
 	github.com/labstack/gommon v0.4.1
 	github.com/stretchr/testify v1.8.4
-	github.com/txsvc/cloudlib v1.0.0
+	github.com/txsvc/cloudlib v1.0.1
 	github.com/txsvc/stdlib/v2 v2.8.1
 	github.com/urfave/cli/v2 v2.25.7
 	github.com/ziflex/lecho/v3 v3.5.0

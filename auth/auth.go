@@ -3,15 +3,19 @@ package auth
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 
 	"github.com/labstack/echo/v4"
 
+	"github.com/txsvc/cloudlib"
 	"github.com/txsvc/cloudlib/settings"
 )
 
 const (
+	TypeAuthProvider cloudlib.ProviderType = 40
+
 	// anonymous
 	ScopeAnonymous = "api:anonymous" // this basically means that the Client is unknown
 	// default API scopes
@@ -25,7 +29,22 @@ const (
 	ScopeApiNoAccess = "api:noaccess"
 )
 
+type (
+	AuthProvider interface {
+		LookupByToken(token string) (*settings.DialSettings, error)
+		UpdateStore(ds *settings.DialSettings) error
+	}
+)
+
 var (
+	// ErrInternalAuthError indicates that soemthing went wrong with the provider
+	ErrInternalAuthError = errors.New("internal auth error")
+	// ErrInvalidCredentials indicates that the provided credentials did not pass validation
+	ErrInvalidCredentials = errors.New("invalid credentials")
+
+	// ErrTokenNotFound indicates that the token is not in the store
+	ErrTokenNotFound = errors.New("token not found")
+
 	// ErrNotAuthorized indicates that the API caller is not authorized
 	ErrNotAuthorized     = errors.New("not authorized")
 	ErrAlreadyAuthorized = errors.New("already authorized")
@@ -40,13 +59,56 @@ var (
 
 	// ErrNoScope indicates that no scope was provided
 	ErrNoScope = errors.New("no scope provided")
+
+	authProvider *cloudlib.Provider
 )
 
-func init() {
-	// just empty maps to avoid any NPEs
-	FlushAuthorizations("")
+//
+// The generic AuthProvider parts
+//
+
+func NewConfig(opts cloudlib.ProviderConfig) (*cloudlib.Provider, error) {
+	if opts.Type != TypeAuthProvider {
+		return nil, fmt.Errorf(cloudlib.MsgUnsupportedProviderType, opts.Type)
+	}
+
+	o, err := cloudlib.New(opts)
+	if err != nil {
+		return nil, err
+	}
+	authProvider = o
+
+	return o, nil
 }
 
+func UpdateConfig(opts cloudlib.ProviderConfig) (*cloudlib.Provider, error) {
+	if opts.Type != TypeAuthProvider {
+		return nil, fmt.Errorf(cloudlib.MsgUnsupportedProviderType, opts.Type)
+	}
+
+	return authProvider, authProvider.RegisterProviders(true, opts)
+}
+
+func LookupByToken(token string) (*settings.DialSettings, error) {
+	imp, found := authProvider.Find(TypeAuthProvider)
+	if !found {
+		return nil, ErrInternalAuthError
+	}
+
+	return imp.(AuthProvider).LookupByToken(token)
+}
+
+func UpdateStore(ds *settings.DialSettings) error {
+	imp, found := authProvider.Find(TypeAuthProvider)
+	if !found {
+		return ErrInternalAuthError
+	}
+
+	return imp.(AuthProvider).UpdateStore(ds)
+}
+
+// Auth functionallity
+//
 // CheckAuthorization relies on the presence of a bearer token and validates the
 // matching authorization against a list of requested scopes. If everything checks out,
 // the function returns the authorization or an error otherwise.
@@ -56,7 +118,7 @@ func CheckAuthorization(ctx context.Context, c echo.Context, scope string) (*set
 		return nil, err
 	}
 
-	auth, err := cache.LookupByToken(token)
+	auth, err := LookupByToken(token)
 	if err != nil || auth == nil || !auth.Credentials.IsValid() {
 		return nil, ErrNotAuthorized
 	}
