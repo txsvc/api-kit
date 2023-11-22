@@ -59,7 +59,7 @@ func NewAppEngineConfigProvider() config.ConfigProvider {
 
 func init() {
 	// initialize the config provider
-	config.SetProvider(NewAppEngineConfigProvider())
+	config.SetProvider(config.NewLocalConfigProvider())
 
 	// create a default configuration for the service (if none exists)
 	path := filepath.Join(config.GetConfig().ConfigLocation(), config.DefaultConfigName)
@@ -73,8 +73,9 @@ func init() {
 		helpers.WriteDialSettings(cfg, path)
 	}
 
-	// FIXME: this is a duplicate, auth.init() already does this. Should initialize the auth provider instead
-	auth.FlushAuthorizations("")
+	// initialize the credentials store
+	root := filepath.Join(config.GetConfig().ConfigLocation(), config.DefaultCredentialsLocation)
+	auth.FlushAuthorizations(root)
 }
 
 func main() {
@@ -84,7 +85,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Do not use AutoTLS here as TLS termination is handled by App Engine.
+	// Do not use AutoTLS here as TLS termination is handled by Google App Engine.
 	// Do not change default port 8080 !
 	svc.Listen("")
 }
@@ -98,6 +99,7 @@ func setup() *echo.Echo {
 	e.Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
 
 	// add your endpoints here
+	e.GET("/", api.DefaultEndpoint)
 	e.GET("/ping", pingEndpoint)
 
 	// done

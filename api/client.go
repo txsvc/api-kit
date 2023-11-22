@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/txsvc/cloudlib/settings"
 	"github.com/txsvc/stdlib/v2"
 
 	"github.com/txsvc/apikit/config"
-	"github.com/txsvc/cloudlib/settings"
 )
 
 const (
