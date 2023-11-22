@@ -2,7 +2,7 @@ name: build_router
 
 on:
   push:
-    branches: [develop]
+    branches: [main]
 
 env:
   CONTEXT_DIR: cmd/router
