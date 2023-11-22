@@ -10,7 +10,6 @@ import (
 	"github.com/txsvc/stdlib/v2"
 
 	"github.com/txsvc/apikit/config"
-	"github.com/txsvc/cloudlib/logger"
 	"github.com/txsvc/cloudlib/settings"
 )
 
@@ -35,15 +34,14 @@ type (
 	Client struct {
 		httpClient *http.Client
 		ds         *settings.DialSettings
-		logger     logger.Logger
 		trace      string
 	}
 )
 
-func NewClient(ds *settings.DialSettings, logger logger.Logger) *Client {
+func NewClient(ds *settings.DialSettings) *Client {
 	var _ds *settings.DialSettings
 
-	httpClient := NewTransport(logger, http.DefaultTransport)
+	httpClient := NewTransport(http.DefaultTransport)
 
 	// create or clone the settings
 	if ds != nil {
@@ -59,7 +57,6 @@ func NewClient(ds *settings.DialSettings, logger logger.Logger) *Client {
 	return &Client{
 		httpClient: httpClient,
 		ds:         _ds,
-		logger:     logger,
 		trace:      stdlib.GetString(config.ForceTraceENV, ""),
 	}
 }

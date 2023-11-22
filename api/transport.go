@@ -3,19 +3,18 @@ package api
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"net/http"
 	"time"
 
 	"github.com/PuerkitoBio/rehttp"
-
-	"github.com/txsvc/cloudlib/logger"
+	"github.com/txsvc/cloudlib/observer"
 )
 
 type (
 	loggingTransport struct {
 		InnerTransport http.RoundTripper
-		Logger         logger.Logger
 	}
 
 	contextKey struct {
@@ -25,7 +24,7 @@ type (
 
 var contextKeyRequestStart = &contextKey{"RequestStart"}
 
-func NewTransport(logger logger.Logger, transport http.RoundTripper) *http.Client {
+func NewTransport(transport http.RoundTripper) *http.Client {
 	retryTransport := rehttp.NewTransport(
 		transport,
 		rehttp.RetryAll(
@@ -41,7 +40,6 @@ func NewTransport(logger logger.Logger, transport http.RoundTripper) *http.Clien
 	return &http.Client{
 		Transport: &loggingTransport{
 			InnerTransport: retryTransport,
-			Logger:         logger,
 		},
 	}
 }
@@ -64,7 +62,7 @@ func (t *loggingTransport) RoundTrip(req *http.Request) (*http.Response, error) 
 
 func (t *loggingTransport) logRequest(req *http.Request) {
 
-	t.Logger.Debugf("--> %s %s\n", req.Method, req.URL)
+	observer.LogWithLevel(observer.LevelDebug, fmt.Sprintf("--> %s %s\n", req.Method, req.URL))
 
 	if req.Body == nil {
 		return
@@ -75,13 +73,13 @@ func (t *loggingTransport) logRequest(req *http.Request) {
 	data, err := io.ReadAll(req.Body)
 
 	if err != nil {
-		t.Logger.Debug("error reading request body:", err)
+		observer.LogWithLevel(observer.LevelDebug, fmt.Sprintf("error reading request body: %v", err))
 	} else {
-		t.Logger.Debug(string(data))
+		observer.LogWithLevel(observer.LevelDebug, fmt.Sprintf("%v", data))
 	}
 
 	if req.Body != nil {
-		t.Logger.Debug(req.Body)
+		observer.LogWithLevel(observer.LevelDebug, fmt.Sprintf("%v", req.Body))
 	}
 
 	req.Body = io.NopCloser(bytes.NewReader(data))
@@ -92,17 +90,17 @@ func (t *loggingTransport) logResponse(resp *http.Response) {
 	defer resp.Body.Close()
 
 	if start, ok := ctx.Value(contextKeyRequestStart).(time.Time); ok {
-		t.Logger.Debugf("<-- %d %s (%s)\n", resp.StatusCode, resp.Request.URL, Duration(time.Since(start), 2))
+		observer.LogWithLevel(observer.LevelDebug, fmt.Sprintf("<-- %d %s (%s)\n", resp.StatusCode, resp.Request.URL, Duration(time.Since(start), 2)))
 	} else {
-		t.Logger.Debugf("<-- %d %s\n", resp.StatusCode, resp.Request.URL)
+		observer.LogWithLevel(observer.LevelDebug, fmt.Sprintf("<-- %d %s\n", resp.StatusCode, resp.Request.URL))
 	}
 
 	data, err := io.ReadAll(resp.Body)
 
 	if err != nil {
-		t.Logger.Debug("error reading response body:", err)
+		observer.LogWithLevel(observer.LevelDebug, fmt.Sprintf("error reading response body: %v", err))
 	} else {
-		t.Logger.Debug(string(data))
+		observer.LogWithLevel(observer.LevelDebug, fmt.Sprintf("%v", data))
 	}
 
 	resp.Body = io.NopCloser(bytes.NewReader(data))
