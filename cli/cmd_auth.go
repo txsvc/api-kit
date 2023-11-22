@@ -12,7 +12,6 @@ import (
 	"github.com/txsvc/apikit/auth"
 	"github.com/txsvc/apikit/config"
 	"github.com/txsvc/cloudlib/helpers"
-	"github.com/txsvc/cloudlib/logger"
 	"github.com/txsvc/cloudlib/settings"
 )
 
@@ -74,7 +73,7 @@ func InitCommand(c *cli.Context) error {
 	cfg := config.GetConfig().Settings()
 
 	// get a client instance
-	cl := api.NewClient(cfg, logger.New())
+	cl := api.NewClient(cfg)
 	if cl == nil {
 		return fmt.Errorf("could not create client")
 	}
@@ -151,7 +150,7 @@ func LoginCommand(c *cli.Context) error {
 	}
 
 	// now start the auth login process with the API
-	cl := api.NewClient(cfg, logger.New())
+	cl := api.NewClient(cfg)
 	if cl == nil {
 		return fmt.Errorf("could not create client")
 	}
@@ -190,7 +189,7 @@ func LogoutCommand(c *cli.Context) error {
 	}
 
 	// now start the auth logout process with the API
-	cl := api.NewClient(cfg, logger.New())
+	cl := api.NewClient(cfg)
 	if cl == nil {
 		return fmt.Errorf("could not create client")
 	}

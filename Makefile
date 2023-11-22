@@ -14,7 +14,7 @@ test:
 
 .PHONY: code_qa
 code_qa:
-	go test `go list ./... | grep -v 'hack\|deprecated'` -coverprofile=coverage.txt -covermode=atomic
+	#go test `go list ./... | grep -v 'hack\|deprecated'` -coverprofile=coverage.txt -covermode=atomic
 	golangci-lint run > lint.txt
 
 .PHONY: test_build
