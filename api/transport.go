@@ -48,14 +48,14 @@ func (t *loggingTransport) RoundTrip(req *http.Request) (*http.Response, error) 
 	ctx := context.WithValue(req.Context(), contextKeyRequestStart, time.Now())
 	req = req.WithContext(ctx)
 
-	t.logRequest(req)
+	//t.logRequest(req)
 
 	resp, err := t.InnerTransport.RoundTrip(req)
 	if err != nil {
 		return resp, err
 	}
 
-	t.logResponse(resp)
+	//t.logResponse(resp)
 
 	return resp, err
 }
