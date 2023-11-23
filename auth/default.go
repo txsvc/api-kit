@@ -1,12 +1,10 @@
 package auth
 
 import (
-	"fmt"
 	"log"
 	"sync"
 
 	"github.com/txsvc/cloudlib"
-	"github.com/txsvc/cloudlib/observer"
 	"github.com/txsvc/cloudlib/settings"
 )
 
@@ -60,7 +58,7 @@ func NewDefaultProvider() interface{} {
 }
 
 func (np *defaultAuthImpl) LookupByToken(token string) (*settings.DialSettings, error) {
-	observer.LogWithLevel(observer.LevelDebug, fmt.Sprintf("lookup. t=%s", token))
+	//observer.LogWithLevel(observer.LevelDebug, fmt.Sprintf("lookup. t=%s", token))
 
 	if token == "" {
 		return nil, ErrNoToken
@@ -82,7 +80,7 @@ func (np *defaultAuthImpl) UpdateStore(ds *settings.DialSettings) error {
 		return ErrInvalidCredentials
 	}
 
-	observer.LogWithLevel(observer.LevelDebug, fmt.Sprintf("update credentials. t=%s/%s", ds.Credentials.ClientID, ds.Credentials.Token))
+	//observer.LogWithLevel(observer.LevelDebug, fmt.Sprintf("update credentials. t=%s/%s", ds.Credentials.ClientID, ds.Credentials.Token))
 
 	/*
 		// check if the settings already exists

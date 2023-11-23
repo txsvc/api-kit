@@ -868,8 +868,8 @@ github.com/tklauser/go-sysconf v0.3.5/go.mod h1:MkWzOF4RMCshBAMXuhXJs64Rte09mITn
 github.com/tklauser/numcpus v0.2.2 h1:oyhllyrScuYI6g+h/zUvNXNp1wy7x8qQy3t/piefldA=
 github.com/tklauser/numcpus v0.2.2/go.mod h1:x3qojaO3uyYt0i56EW/VUYs7uBvdl2fkfZFu0T9wgjM=
 github.com/tmc/grpc-websocket-proxy v0.0.0-20170815181823-89b8d40f7ca8/go.mod h1:ncp9v5uamzpCO7NfCPTXjqaC+bZgJeR0sMTm6dMHP7U=
-github.com/txsvc/cloudlib v1.0.1 h1:FULdIvhFyIbLnM1bomzoHFLaEEdBt+YVcdAaetl5aZo=
-github.com/txsvc/cloudlib v1.0.1/go.mod h1:BG/bzAT3/6hoC8yfNPGSal1py6ebrRjlXsNLXn4uplM=
+github.com/txsvc/cloudlib v1.0.2 h1:kUiDGJrZ1fs3iMVzkINo07DEUbb8/r2UGQGqJ5Q2VXU=
+github.com/txsvc/cloudlib v1.0.2/go.mod h1:BG/bzAT3/6hoC8yfNPGSal1py6ebrRjlXsNLXn4uplM=
 github.com/txsvc/stdlib/v2 v2.8.1 h1:2Xb5zvnGSAfU9jJXaZVQwTeipNYlbtHXTHRFKgWWdXo=
 github.com/txsvc/stdlib/v2 v2.8.1/go.mod h1:zQH4m2gAbf/0PH+rltiLhfG7jDprgM7frYzmme34u60=
 github.com/tyler-smith/go-bip39 v1.0.1-0.20181017060643-dbb3b84ba2ef h1:wHSqTBrZW24CsNJDfeh9Ex6Pm0Rcpc7qrgKBiL44vF4=
