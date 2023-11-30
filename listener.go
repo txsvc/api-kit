@@ -13,7 +13,6 @@ import (
 	"golang.org/x/crypto/acme/autocert"
 
 	"github.com/txsvc/stdlib/v2"
-	"github.com/txsvc/stdlib/v2/deprecated/stringsx"
 
 	"github.com/txsvc/apikit/config"
 )
@@ -40,7 +39,7 @@ func (a *App) listen(addr, certFile, keyFile string, useTLS bool) {
 	}()
 
 	if useTLS {
-		port := fmt.Sprintf(":%s", stringsx.TakeOne(stdlib.GetString(config.PortENV, addr), PORT_DEFAULT_TLS))
+		port := fmt.Sprintf(":%s", takeOne(stdlib.GetString(config.PortENV, addr), PORT_DEFAULT_TLS))
 		certDir := fmt.Sprintf("%s/.cert", a.root)
 
 		autoTLSManager := autocert.Manager{
@@ -63,7 +62,16 @@ func (a *App) listen(addr, certFile, keyFile string, useTLS bool) {
 		}
 	} else {
 		// simply startup without TLS
-		port := fmt.Sprintf(":%s", stringsx.TakeOne(stdlib.GetString(config.PortENV, addr), PORT_DEFAULT))
+		port := fmt.Sprintf(":%s", takeOne(stdlib.GetString(config.PortENV, addr), PORT_DEFAULT))
 		log.Fatal(a.svc.Start(port))
 	}
+}
+
+// takeOne returns valid string if not empty or later one.
+func takeOne(valid, or string) string {
+	if len(valid) > 0 {
+		return valid
+	}
+
+	return or
 }
